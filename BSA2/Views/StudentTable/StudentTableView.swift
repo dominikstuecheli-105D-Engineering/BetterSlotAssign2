@@ -89,6 +89,18 @@ struct StudentTableView: View {
 			}
 			
 		}
+		
+		.onAppear {
+			session.provideCellConditionHostsForStudentTableToErrorCollector()
+		}
+		
+		.onChange(of: session.choiceAmount) { _,_ in
+			session.provideCellConditionHostsForStudentTableToErrorCollector()
+		}
+		
+		.onChange(of: session.allowForMandatoryPartners) { _,_ in
+			session.provideCellConditionHostsForStudentTableToErrorCollector()
+		}
 	}
 }
 

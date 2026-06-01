@@ -23,23 +23,19 @@ struct CategoryLineView: View {
 			
 			HDivider()
 			
-			ConditionalTextCell($category.name, focusState: $focusState, focusIndex: focusIndex(item: category, row: 1, rowCount: 4)) { _ in
-				return category.nameCondition(session: session)
-			}
+			ConditionalTextCell($category.name, focusState: $focusState, focusIndex: focusIndex(item: category, row: 1, rowCount: 4))
 			
 			HDivider()
 			
-			ConditionalIntegerCell($category.number, focusState: $focusState, focusIndex: focusIndex(item: category, row: 2, rowCount: 4)) { _ in
-				category.numberCondition(session: session)
-			}
+			ConditionalIntegerCell($category.number, focusState: $focusState, focusIndex: focusIndex(item: category, row: 2, rowCount: 4))
 			
 			HDivider()
 			
-			ConditionalIntegerCell($category.capacity, focusState: $focusState, focusIndex: focusIndex(item: category, row: 3, rowCount: 4)) { _ in return .met()}
+			ConditionalIntegerCell($category.capacity, focusState: $focusState, focusIndex: focusIndex(item: category, row: 3, rowCount: 4))
 			
 			HDivider()
 			
-			ConditionalIntegerCell($category.minParticipantRequirement, focusState: $focusState, focusIndex: focusIndex(item: category, row: 4, rowCount: 4)) { _ in return .met()}
+			ConditionalIntegerCell($category.minParticipantRequirement, focusState: $focusState, focusIndex: focusIndex(item: category, row: 4, rowCount: 4))
 		}
 		.fixedSize(horizontal: false, vertical: true)
 		

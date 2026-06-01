@@ -85,3 +85,30 @@ extension Student {
 		return .met()
 	}
 }
+
+
+
+extension Session {
+	func provideCellConditionHostsForStudentTableToErrorCollector() { //Very compact function name I know
+		ErrorCollector.reset()
+		
+		for student in students {
+			let firstCellInLineIndex = focusIndex(item: student, row: 1, rowCount: studentTableRowCount())
+			
+			ErrorCollector.shared.cellConditionHosts[firstCellInLineIndex] = TextCellConditionHost(getValue: {return student.name}, update: {_ in student.nameConditon(in: self)})
+			
+			for choiceIndex in 1...choiceAmount {
+				ErrorCollector.shared.cellConditionHosts[firstCellInLineIndex+choiceIndex] = IntegerCellConditionHost(getValue: {
+					if student.choices[choiceIndex] == nil { student.choices[choiceIndex] = nil } //Making sure an entry with that index exists in the dictionary
+					return student.choices[choiceIndex] ?? nil
+				}, update: { input in student.choiceCondition(index: choiceIndex, value: input, session: self)})
+			}
+			
+			if allowForMandatoryPartners {
+				ErrorCollector.shared.cellConditionHosts[firstCellInLineIndex-1+studentTableRowCount()] = TextCellConditionHost(getValue: {return student.mandatoryPartner}, update: {_ in student.mandatoryPartnerCondition(session: self)})
+			}
+		}
+		
+		ErrorCollector.readAndSaveAllCellStatesIntoErrorsArray()
+	}
+}

@@ -19,6 +19,17 @@ import SwiftData
 	var progress: Double = 0
 }
 
+//Truncating the student choice dictionary to remove unused nil values and sort it
+extension Dictionary where Key == Int, Value == Int? {
+	func truncated(toLength length: Int) -> [Int:Int?] {
+		var returnSet: [Int:Int?] = [:]
+		for choice in self.sorted(by: {$0.key < $1.key}) {
+			if choice.key <= length { returnSet[choice.key] = choice.value }
+		}
+		return returnSet
+	}
+}
+
 extension Allocation {
 	
 	//Make a documentation entry
@@ -548,9 +559,9 @@ extension Allocation {
 			
 			///**1.2.3** Is the given mandatory partner valid?
 			var foundPartner: Student?
-			if student.mandatoryPartner != "" && !invalid {
+			if allowForMandatoryPartners && student.mandatoryPartner != "" && !invalid {
 				if let partner = session.students.first(where: {$0.name == student.mandatoryPartner}) {
-					if partner.choices != student.choices {
+					if partner.choices.truncated(toLength: choiceAmount) != student.choices.truncated(toLength: choiceAmount) { ///The .truncated() function sorts (SwiftData sometimes shuffles the key-value pairs in the array) and shortens the dictionary to only the used choices so that this check does not return true even tho they are "identical"
 						///**1.2.3.1** Not the same choices
 						document("1.2.3.1", .destructiveAction, into: modelContext, "\(student.name) und \(partner.name) haben nicht identisch gewählt und werden nicht als Partner*innen berücksichtigt.")
 					} else if partner.mandatoryPartner != student.name {

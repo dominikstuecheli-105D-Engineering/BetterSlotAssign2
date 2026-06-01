@@ -23,26 +23,19 @@ struct StudentLineView: View {
 			
 			HDivider()
 			
-			ConditionalTextCell($student.name, focusState: $focusState, focusIndex: focusIndex(item: student, row: 1, rowCount: session.studentTableRowCount())) { _ in
-				return student.nameConditon(in: session)
-			}
+			ConditionalTextCell($student.name, focusState: $focusState, focusIndex: focusIndex(item: student, row: 1, rowCount: session.studentTableRowCount()))
 			
 			HDivider()
 			
 			ForEach(1...session.choiceAmount, id: \.self) { i in
-				ConditionalIntegerCell(Binding(get: {return student.choices[i] ?? nil}, set: {v in student.choices[i] = v}), focusState: $focusState, focusIndex: focusIndex(item: student, row: i+1, rowCount: session.studentTableRowCount())) { value in
-					return student.choiceCondition(index: i, value: value, session: session)
-				}
+				ConditionalIntegerCell(Binding(get: {return student.choices[i] ?? nil}, set: {v in student.choices[i] = v}), focusState: $focusState, focusIndex: focusIndex(item: student, row: i+1, rowCount: session.studentTableRowCount()))
 				
 				HDivider()
 			}
 			
 			if session.allowForMandatoryPartners {
 				
-				ConditionalTextCell($student.mandatoryPartner, focusState: $focusState, focusIndex: focusIndex(item: student, row: session.choiceAmount+2, rowCount: session.studentTableRowCount())) { _ in
-					return student.mandatoryPartnerCondition(session: session)
-					
-				}
+				ConditionalTextCell($student.mandatoryPartner, focusState: $focusState, focusIndex: focusIndex(item: student, row: session.choiceAmount+2, rowCount: session.studentTableRowCount()))
 			}
 		}
 		.fixedSize(horizontal: false, vertical: true)

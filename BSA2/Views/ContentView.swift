@@ -55,8 +55,9 @@ struct ContentView: View {
 //						.resizable()
 //						.scaledToFit()
 //						.frame(maxHeight: 12)
+					Text("BetterSlotAssign2 (BSA2)\nCopyright © 2026 Dominik Stücheli. All rights reserved.") .font(.footnote) .foregroundStyle(.gray)
 					
-					if let codebaseURL = URL(string: "https://github.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2") {
+					if let codebaseURL = URL(string: "https://github.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/tree/main/BSA2") {
 						Link("Codebase auf Github (Link)", destination: codebaseURL)
 					}
 				} .padding(standartPadding)

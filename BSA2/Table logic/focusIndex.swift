@@ -18,8 +18,12 @@ func focusIndex(item: any PersistentArrayCompatible, row: Int, rowCount: Int) ->
 	return item.index * rowCount - rowCount + row
 }
 
+func rowIndexFromFocusIndex(focusIndex: Int, rowCount: Int) -> Int {
+	return (focusIndex-1) % rowCount + 1
+}
+
 func lineIndexFromFocusIndex(focusIndex: Int, rowCount: Int) -> Int {
-	let inLineIndex = (focusIndex-1) % rowCount + 1
+	let inLineIndex = rowIndexFromFocusIndex(focusIndex: focusIndex, rowCount: rowCount)
 	let firstCellInLineIndex = focusIndex - inLineIndex
 	return firstCellInLineIndex/rowCount + 1
 }

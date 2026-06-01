@@ -24,7 +24,6 @@ struct WindowPicker: View {
 	var body: some View {
 		HStack(spacing: 0) {
 			Button {
-				ErrorCollector.discardAll()
 				selectedWindow = .studentTable
 			} label: {
 				Text("Schülerliste")
@@ -38,7 +37,6 @@ struct WindowPicker: View {
 			} .buttonStyle(.plain)
 			
 			Button {
-				ErrorCollector.discardAll()
 				selectedWindow = .categoryTable
 			} label: {
 				Text("Kategorienliste")
@@ -52,7 +50,6 @@ struct WindowPicker: View {
 			} .buttonStyle(.plain)
 			
 			Button {
-				ErrorCollector.discardAll()
 				selectedWindow = .allocations
 			} label: {
 				Text("Zuteilungen")

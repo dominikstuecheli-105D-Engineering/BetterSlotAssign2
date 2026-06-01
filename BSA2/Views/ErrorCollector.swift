@@ -11,7 +11,7 @@ import SwiftUI
 
 
 
-enum ConditionReturn {
+enum ConditionReturn: Equatable {
 	case invalid(errorText: String?) //The input is by type impossible
 	case validButNotAllowed(errorText: String?, updateGroup: [Int]) //The input has the right type but opens conflicts with other data
 	case conflictOfInterest(errorText: String?, updateGroup: [Int]) //Same concept as validButNotAllowed but aiming to mark conflicts of interest
@@ -55,6 +55,10 @@ enum ConditionReturn {
 		case .met(let updateGroup): return updateGroup
 		}
 	}
+	
+	static func ==(lhs: ConditionReturn, rhs: ConditionReturn) -> Bool {
+		return (lhs.getTypeString() == rhs.getTypeString() && lhs.getErrorText() == rhs.getErrorText())
+	}
 }
 
 
@@ -68,7 +72,7 @@ struct ErrorCollectorItemView: View {
 	var body: some View {
 		if let errorText = value.getErrorText() {
 			HStack(spacing: standartPadding) {
-				Rectangle()
+				RoundedRectangle(cornerRadius: standartPadding/2)
 					.frame(width: standartPadding)
 					.foregroundStyle(value.getColor() ?? .gray)
 				
@@ -88,9 +92,9 @@ struct ErrorCollectorItemView: View {
 
 
 
-@Observable class ErrorCollector {
+@Observable class OLDErrorCollector {
 	
-	static var shared = ErrorCollector() //Singleton
+	static var shared = OLDErrorCollector() //Singleton
 	
 	var errors: [Int:ConditionReturn] = [:]
 	var updateTriggers: [Int:Bool] = [:]
@@ -131,4 +135,131 @@ struct ErrorCollectorItemView: View {
 	}
 	
 	init() {}
+}
+
+
+
+//MARK: NOT USED YET
+@Observable class ErrorCollector {
+	
+	static var shared = ErrorCollector() //Singleton
+	
+	var cellConditionHosts: [Int:any CellConditionHost] = [:]
+	var errors: [Int:ConditionReturn] = [:]
+	
+	private var updateWorkItem: DispatchWorkItem?
+	
+	//Schedule an update
+	static func scheduleUpdate(at index: Int) {
+		self.shared.updateWorkItem?.cancel()
+		
+		self.shared.updateWorkItem = DispatchWorkItem {ErrorCollector.update(at: index)}
+		DispatchQueue.main.asyncAfter(deadline: .now()+0.2, execute: self.shared.updateWorkItem!)
+	}
+	
+	//Update state and trigger view updates of the given update group
+	fileprivate static func update(at index: Int) {
+		let oldUpdateGroup = self.shared.errors[index]?.getUpdateGroup() ?? [] //The old update group also needs to be updated to revert eventual changes
+		
+		let newState = self.shared.cellConditionHosts[index]!.update()
+		
+		///**IN CASE OF BUGS**
+		//print("oldUpdateGroup: \(oldUpdateGroup)")
+		//print("update initiated at \(index) with updateGroup: \(newState.getUpdateGroup() ?? [])")
+		
+		self.shared.errors[index] = newState
+		
+		var updateGroup: [Int] = []
+		if let newUpdateGroup = newState.getUpdateGroup() {
+			updateGroup = mergeUpdateGroups(oldUpdateGroup, newUpdateGroup)
+		} else {
+			updateGroup = oldUpdateGroup
+		}
+		
+		//print("final updateGroup: \(updateGroup)")
+		
+		for updateIndex in updateGroup {
+			if updateIndex != index { self.shared.errors[updateIndex] = self.shared.cellConditionHosts[updateIndex]!.update() }
+		}
+	}
+	
+	static func reset() {
+		self.shared.updateWorkItem?.cancel()
+		self.shared.cellConditionHosts = [:]
+		self.shared.errors = [:]
+	}
+	
+	static func readAndSaveAllCellStatesIntoErrorsArray() {
+		for cellConditionHostDictPair in ErrorCollector.shared.cellConditionHosts {
+			ErrorCollector.shared.errors[cellConditionHostDictPair.key] = cellConditionHostDictPair.value.state
+		}
+	}
+	
+	init() {}
+}
+
+
+
+protocol CellConditionHost {
+	associatedtype SourceValueType
+	associatedtype ConditionCheckValueType
+	var getValueFunction: () -> SourceValueType {get}
+	var updateFunction: (ConditionCheckValueType) -> ConditionReturn {get}
+	var state: ConditionReturn {get}
+	
+	func update() -> ConditionReturn
+	
+	init(getValue getValueFunction: @escaping () -> SourceValueType, update updateFunction: @escaping (ConditionCheckValueType) -> ConditionReturn)
+}
+
+
+
+@Observable class TextCellConditionHost: CellConditionHost {
+	
+	internal var getValueFunction: () -> String
+	internal var updateFunction: (String) -> ConditionReturn
+	var state: ConditionReturn
+	
+	internal func update() -> ConditionReturn {
+		state = updateFunction(getValueFunction())
+		return state
+	}
+	
+	required init(getValue getValueFunction: @escaping () -> String, update updateFunction: @escaping (String) -> ConditionReturn) {
+		self.getValueFunction = getValueFunction
+		self.updateFunction = updateFunction
+		state = updateFunction(getValueFunction())
+	}
+}
+
+
+
+@Observable class IntegerCellConditionHost: CellConditionHost {
+	
+	internal var getValueFunction: () -> Int?
+	internal var updateFunction: (Int) -> ConditionReturn
+	var state: ConditionReturn
+	
+	internal func update() -> ConditionReturn {
+		let value = getValueFunction()
+		if let integer: Int = value {
+			state = updateFunction(integer)
+			return state
+		} else {
+			state = .invalid(errorText: "Muss eine ganze Zahl sein")
+			return state
+		}
+	}
+	
+	required init(getValue getValueFunction: @escaping () -> Int?, update updateFunction: @escaping (Int) -> ConditionReturn) {
+		self.getValueFunction = getValueFunction
+		self.updateFunction = updateFunction
+		
+		let value = getValueFunction()
+		if let integer: Int = value {
+			state = updateFunction(integer)
+		} else {
+			state = .invalid(errorText: "Muss eine ganze Zahl sein")
+		}
+	}
 }

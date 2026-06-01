@@ -21,6 +21,9 @@ protocol PersistentArrayCompatible: PersistentModel {
 
 extension Array where Element: PersistentArrayCompatible {
 	
+	//Getting a specific element
+	func getIndex(_ index: Int) -> Element? { return first(where: {$0.index == index}) }
+	
 	//Redoes the position values to always start at 1 and be 1 apart.
 	///**OUTDATED, NOT USED INTERNALLY ANYMORE**
 	mutating func reIndex() {
