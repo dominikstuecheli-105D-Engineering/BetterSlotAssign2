@@ -62,6 +62,12 @@ struct AllocationItemListView: View {
 			}
 		}
 		
+		.background {
+			if isHovering {
+				Color.gray.opacity(0.1)
+			}
+		}
+		
 		.onHover { hover in
 			isHovering = hover
 		}

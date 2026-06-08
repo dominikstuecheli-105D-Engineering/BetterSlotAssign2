@@ -13,7 +13,7 @@ import SwiftUI
 struct CategoryTableView: View {
 	
 	@Environment(Session.self) var session: Session
-	@FocusState.Binding var focusState: Int?
+	@FocusState.Binding var focusState: CellIndex?
 	@Binding var scrollPosition: ScrollPosition
 	
 	@Environment(\.modelContext) var modelContext
@@ -36,7 +36,7 @@ struct CategoryTableView: View {
 			VDivider()
 			
 			ScrollView { LazyVStack(spacing: 0) {
-				ForEach(session.categories.indexSorted(), id: \.id) { category in
+				ForEach(session.categories.indexSorted()) { category in
 					CategoryLineView(category: category, focusState: $focusState)
 					
 					VDivider()
@@ -45,17 +45,21 @@ struct CategoryTableView: View {
 			
 			//Keyboard shortcuts
 				.onKeyPress { press in
-					let currentlySelectedCategoryIndex = lineIndexFromFocusIndex(focusIndex: focusState ?? 0, rowCount: session.studentTableRowCount())
+					let currentlySelectedCategoryIndex = focusState?.line ?? 1
+					
+					//Next cell
+					if press.key == .tab { focusState?.increase(rowCount: 4) }
 					
 					//Adding a category after the currently selected one
 					if press.key == .downArrow && press.modifiers.contains(.shift) {
 						let newCategory = Category(index: currentlySelectedCategoryIndex+1)
 						session.categories.add(newCategory)
+						session.provideCellConditionHostsForCategoryTableToErrorCollector()
 						
 						//Setting the focusState to the first field of the newly added category. Delayed to give SwiftUI time to build the views... :(
 						DispatchQueue.main.asyncAfter(deadline: .now()+0.1) {
 							scrollPosition.scrollTo(id: newCategory.index)
-							focusState = focusIndex(item: newCategory, row: 1, rowCount: 4)
+							focusState = CellIndex(item: newCategory, row: 1)
 						}
 						return .handled
 					}
@@ -63,12 +67,13 @@ struct CategoryTableView: View {
 					//Removing the currently selected student
 					if press.key == .upArrow && press.modifiers.contains(.shift) && session.students.count >= 1 {
 						session.categories.remove(itemPosition: currentlySelectedCategoryIndex, from: modelContext)
+						session.provideCellConditionHostsForCategoryTableToErrorCollector()
 						
 						let previousCategoryIndex = currentlySelectedCategoryIndex-1
 						
 						DispatchQueue.main.asyncAfter(deadline: .now()+0.1) {
 							scrollPosition.scrollTo(id: previousCategoryIndex)
-							focusState = focusIndex(line: previousCategoryIndex, row: 1, rowCount: 4)
+							focusState = CellIndex(line: previousCategoryIndex, row: 1)
 						}
 						return .handled
 					}
@@ -83,13 +88,13 @@ struct CategoryTableView: View {
 				Text("**[Tab]** = nächstes Feld, **[Shift+downArrow]** = neue Kategorie, **[Shift+upArrow]** = Kategorie löschen") .padding(standartPadding) .foregroundStyle(.gray)
 			}
 		}
+		
+		.onAppear {
+			session.provideCellConditionHostsForCategoryTableToErrorCollector()
+		}
+		
+		.onChange(of: session.id) {
+			session.provideCellConditionHostsForCategoryTableToErrorCollector()
+		}
 	}
-}
-
-#Preview {
-	@Previewable @FocusState var focusState: Int?
-	@Previewable @State var scrollPosition = ScrollPosition()
-	
-	CategoryTableView(focusState: $focusState, scrollPosition: $scrollPosition)
-		.environment(Session())
 }

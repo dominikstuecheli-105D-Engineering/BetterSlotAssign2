@@ -27,14 +27,6 @@ import SwiftData
 		self.index = index
 	}
 	
-	//Data transfer object
-	struct DTO: Codable {
-		var name: String
-		var choices: [Int:Int?]
-		var index: Int
-		var id: UUID
-	}
-	
 	//Function to import from CSV formatted as string array
 	required init?(fromStringArray strings: [String], configuration: [Int:RowConfigurator], index: Int) {
 		guard strings.count >= configuration.count else {return nil}

@@ -94,20 +94,20 @@ struct TextCell: View {
 	
 	@Binding var text: String
 	var color: Color?
-	@FocusState.Binding var focusState: Int?
-	var focusIndex: Int
+	@FocusState.Binding var focusState: CellIndex?
+	var cellIndex: CellIndex
 	
-	init(_ text: Binding<String>, color: Color? = nil, focusState: FocusState<Int?>.Binding, focusIndex: Int) {
+	init(_ text: Binding<String>, color: Color? = nil, focusState: FocusState<CellIndex?>.Binding, cellIndex: CellIndex) {
 		self._text = text
 		self.color = color
 		self._focusState = focusState
-		self.focusIndex = focusIndex
+		self.cellIndex = cellIndex
 	}
 	
 	var body: some View {
 		TextField("", text: $text)
 			.textFieldStyle(.plain)
-			.focused($focusState, equals: focusIndex)
+			.focused($focusState, equals: cellIndex)
 			.padding(standartPadding)
 		
 			.background {
@@ -124,7 +124,7 @@ struct TextCell: View {
 //					.foregroundStyle(Color(red: .random(in: 0...1), green: .random(in: 0...1), blue: .random(in: 0...1)))
 			}
 		
-			.id(focusIndex)
+			.id(cellIndex)
 	}
 }
 
@@ -137,8 +137,8 @@ struct ConditionalTextCell: View {
 	
 	@Binding var text: String
 	
-	@FocusState.Binding var focusState: Int?
-	var focusIndex: Int
+	@FocusState.Binding var focusState: CellIndex?
+	var cellIndex: CellIndex
 	
 	@State private var conditionState: ConditionReturn = .met()
 	
@@ -146,25 +146,25 @@ struct ConditionalTextCell: View {
 		return conditionState.getColor()
 	}
 	
-	init(_ text: Binding<String>, focusState: FocusState<Int?>.Binding, focusIndex: Int) {
+	init(_ text: Binding<String>, focusState: FocusState<CellIndex?>.Binding, cellIndex: CellIndex) {
 		self._text = text
 		self._focusState = focusState
-		self.focusIndex = focusIndex
+		self.cellIndex = cellIndex
 	}
 	
 	var body: some View {
-		TextCell($text, color: color(), focusState: $focusState, focusIndex: focusIndex)
+		TextCell($text, color: color(), focusState: $focusState, cellIndex: cellIndex)
 			.onChange(of: text) { _,_ in
-				ErrorCollector.scheduleUpdate(at: focusIndex)
+				ErrorCollector.scheduleUpdate(at: cellIndex)
 			}
 		
 			.onAppear {
 				DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-					if let state = ErrorCollector.shared.errors[focusIndex] { conditionState = state }
+					if let state = ErrorCollector.shared.errors[cellIndex] { conditionState = state }
 				}
 			}
 		
-			.onChange(of: ErrorCollector.shared.errors[focusIndex]) { _, new in
+			.onChange(of: ErrorCollector.shared.errors[cellIndex]) { _, new in
 				if let new { conditionState = new }
 			}
 		
@@ -185,8 +185,8 @@ struct ConditionalIntegerCell: View {
 	
 	@Binding var value: Int?
 	
-	@FocusState.Binding var focusState: Int?
-	var focusIndex: Int
+	@FocusState.Binding var focusState: CellIndex?
+	var cellIndex: CellIndex
 	
 	@State private var conditionState: ConditionReturn = .met()
 	@State private var localString: String = ""
@@ -195,32 +195,31 @@ struct ConditionalIntegerCell: View {
 		return conditionState.getColor()
 	}
 	
-	init(_ value: Binding<Int?>, focusState: FocusState<Int?>.Binding, focusIndex: Int) {
+	init(_ value: Binding<Int?>, focusState: FocusState<CellIndex?>.Binding, cellIndex: CellIndex) {
 		self._value = value
 		if let integer = value.wrappedValue { self.localString = String(integer) }
 		self._focusState = focusState
-		self.focusIndex = focusIndex
+		self.cellIndex = cellIndex
 	}
 	
 	var body: some View {
-		TextCell($localString, color: color(), focusState: $focusState, focusIndex: focusIndex)
+		TextCell($localString, color: color(), focusState: $focusState, cellIndex: cellIndex)
 			.onChange(of: localString) { _,_ in
 				if let integer = Int(localString) {
 					value = integer
 				} else {
 					value = nil
 				}
-				ErrorCollector.scheduleUpdate(at: focusIndex)
+				ErrorCollector.scheduleUpdate(at: cellIndex)
 			}
 		
 			.onAppear {
 				DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-					if let state = ErrorCollector.shared.errors[focusIndex] { conditionState = state }
-					print("\(ErrorCollector.shared.errors[focusIndex]) at \(focusIndex)")
+					if let state = ErrorCollector.shared.errors[cellIndex] { conditionState = state }
 				}
 			}
 		
-			.onChange(of: ErrorCollector.shared.errors[focusIndex]) { _, new in
+			.onChange(of: ErrorCollector.shared.errors[cellIndex]) { _, new in
 				if let new { conditionState = new }
 			}
 		

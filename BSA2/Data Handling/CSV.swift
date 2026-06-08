@@ -14,7 +14,7 @@ import UniformTypeIdentifiers
 
 //MARK: EXPLANATION ROWCONFIGURATOR
 
-///The RowConfigurator type allows mapping of content, so it should be an enum of all types of content cells that should/could be in the CSV. the Dictionary with an Integer as a key then says which content is in what cell index (starting at 0). used for both encoding and decoding.
+///The RowConfigurator type allows mapping of content, so it should be an enum of all types of content cells that should/could be in the CSV. the Dictionary with an Integer as a key then says which content is in what row index **(starting at 0)**. used for both encoding and decoding.
 
 
 
@@ -50,6 +50,7 @@ protocol CSVBlockCodable: CSVBlockEncodable, CSVBlockDecodable {}
 
 
 
+//A class that contains all functions used for CSV Data handling. not really needed as a class but nice as a structure and for the syntax
 class CSV {
 	
 	//For customizable parsing
@@ -78,7 +79,7 @@ class CSV {
 		//Finished with the access
 		url.stopAccessingSecurityScopedResource()
 		
-		//Remove BOM
+		//Remove BOM if there
 		if string.hasPrefix("\u{FEFF}") {string.removeFirst()}
 		
 		//Normalize line breaks to \n
@@ -114,13 +115,8 @@ class CSV {
 		}
 		
 		//Last line
-		if !currentField.isEmpty {
-			currentLine.append(currentField)
-		}
-		
-		if !currentLine.isEmpty {
-			result.append(currentLine)
-		}
+		if !currentField.isEmpty { currentLine.append(currentField) }
+		if !currentLine.isEmpty { result.append(currentLine) }
 		
 		//Finishing touchups
 		
@@ -147,7 +143,9 @@ class CSV {
 		return result
 	}
 	
-	//Parsing to CSVCodable array
+	
+	
+	//Parsing to CSVCodable object array
 	static func parseToItems<Item: CSVDecodable>(_ stringTable: [[String]], configuration: [Int:Item.RowConfigurator]) -> [Item] {
 		var returnArr: [Item] = []
 		var indexCounter = 1
@@ -190,6 +188,8 @@ class CSV {
 		return result
 	}
 	
+	
+	
 	//Making a table from items
 	static func makeTableFromItems<Item: CSVEncodable>(_ items: [Item], configuration: [Int:Item.RowConfigurator], header: [[String]] = [[]]) -> [[String]] {
 		var pureStringTable = header
@@ -201,10 +201,14 @@ class CSV {
 		return pureStringTable
 	}
 	
+	
+	
 	//From an array of CSVCodable items
 	static func encode<Item: CSVEncodable>(_ items: [Item], configuration: [Int:Item.RowConfigurator]) -> String {
 		return encode(makeTableFromItems(items, configuration: configuration))
 	}
+	
+	
 	
 	//MARK: FILE TYPE
 	

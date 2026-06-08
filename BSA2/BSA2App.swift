@@ -22,14 +22,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 @main
 struct BSA2App: App {
 	
-@NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+	@NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 	
     var body: some Scene {
 		WindowGroup {
 			ContentView()
 		}
 		
-		.modelContainer(for: [Session.self], inMemory: false)
+		.modelContainer(for: [Session.self, PersistentSettings.self], inMemory: false)
 		.windowToolbarStyle(.unifiedCompact)
 		.windowStyle(.hiddenTitleBar)
     }

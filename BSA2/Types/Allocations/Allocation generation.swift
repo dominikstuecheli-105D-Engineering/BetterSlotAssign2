@@ -11,13 +11,11 @@ import SwiftData
 
 
 
-//MARK: HELPER FUNCTIONS
+//This file contains all the code that actually generates allocations.
 
-//Helper object to transmit progress data to a view
-@MainActor @Observable class AsyncProgress {
-	var currentStep: String = ""
-	var progress: Double = 0
-}
+
+
+//MARK: HELPER FUNCTIONS
 
 //Truncating the student choice dictionary to remove unused nil values and sort it
 extension Dictionary where Key == Int, Value == Int? {
@@ -125,6 +123,12 @@ nonisolated func nicePrint(_ string: String, do execute: Bool = true, level: Int
 
 
 //MARK: HELPER OBJECTS
+
+//Helper object to transmit progress data to a view
+@MainActor @Observable class AsyncProgress {
+	var currentStep: String = ""
+	var progress: Double = 0
+}
 
 //Helper object to easier give information to functions
 ///It may seem stupid at first but always giving these three variables in each function call makes it a lot worse trust me
@@ -703,5 +707,6 @@ extension Allocation {
 		
 		progress.currentStep = "Fertig!"
 		nicePrint("exited generate() function after \(timeSinceStart())s", level: 0)
+		generationDuration = timeSinceStart()
 	}
 }

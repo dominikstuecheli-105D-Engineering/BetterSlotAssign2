@@ -64,13 +64,4 @@ enum AllocationDocumentationEntryType: Int, Codable {
 		self.index = index
 		self.stepCode = stepCode
 	}
-	
-	//Data transfer object
-	struct DTO: Codable {
-		var type: AllocationDocumentationEntryType
-		var desc: String
-		var stepCode: String
-		var index: Int
-		var id: UUID
-	}
 }

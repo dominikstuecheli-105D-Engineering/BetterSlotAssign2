@@ -15,7 +15,7 @@ struct StudentLineView: View {
 	@Bindable var student: Student
 	@Environment(Session.self) var session: Session
 	
-	@FocusState.Binding var focusState: Int?
+	@FocusState.Binding var focusState: CellIndex?
 	
     var body: some View {
 		HStack(spacing: 0) {
@@ -23,22 +23,22 @@ struct StudentLineView: View {
 			
 			HDivider()
 			
-			ConditionalTextCell($student.name, focusState: $focusState, focusIndex: focusIndex(item: student, row: 1, rowCount: session.studentTableRowCount()))
-			
+			ConditionalTextCell($student.name, focusState: $focusState, cellIndex: CellIndex(item: student, row: 1))
 			HDivider()
 			
 			ForEach(1...session.choiceAmount, id: \.self) { i in
-				ConditionalIntegerCell(Binding(get: {return student.choices[i] ?? nil}, set: {v in student.choices[i] = v}), focusState: $focusState, focusIndex: focusIndex(item: student, row: i+1, rowCount: session.studentTableRowCount()))
+				ConditionalIntegerCell(Binding(get: {return student.choices[i] ?? nil}, set: {v in student.choices[i] = v}), focusState: $focusState, cellIndex: CellIndex(item: student, row: i+1))
 				
 				HDivider()
 			}
 			
 			if session.allowForMandatoryPartners {
 				
-				ConditionalTextCell($student.mandatoryPartner, focusState: $focusState, focusIndex: focusIndex(item: student, row: session.choiceAmount+2, rowCount: session.studentTableRowCount()))
+				ConditionalTextCell($student.mandatoryPartner, focusState: $focusState, cellIndex: CellIndex(item: student, row: session.choiceAmount+2))
 			}
 		}
 		.fixedSize(horizontal: false, vertical: true)
+		.id(student.index)
 		
 		//Drag&Drop
 		.draggable(ReferenceTransferable(for: student)) {Color.clear}
@@ -46,11 +46,4 @@ struct StudentLineView: View {
 			session.students.moveFromTransferable(to: student.index)
 		}
     }
-}
-
-#Preview {
-	@Previewable @FocusState var focusState: Int?
-	
-	StudentLineView(student: Student("Name", choices: [1:1, 2:2], index: 1), focusState: $focusState)
-		.padding(50)
 }

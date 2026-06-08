@@ -27,11 +27,13 @@ struct ContentView: View {
 	
 	@State var errorCollector = ErrorCollector.shared
 	
-	@FocusState var focusState: Int?
+	@FocusState var focusState: CellIndex?
 	@State var scrollPosition = ScrollPosition()
 	
 	@State var leftSidebarExpanded: Bool = true
 	@State var rightSidebarExpanded: Bool = true
+	
+	@State var persistentSettings: PersistentSettings?
 	
 	@State var deleteSessionAlertOpen: Bool = false
 	
@@ -51,10 +53,6 @@ struct ContentView: View {
 			
 			.overlay(alignment: .bottom) {
 				VStack(spacing: standartPadding) {
-//					Image("105DLogo")
-//						.resizable()
-//						.scaledToFit()
-//						.frame(maxHeight: 12)
 					Text("BetterSlotAssign2 (BSA2)\nCopyright © 2026 Dominik Stücheli. All rights reserved.") .font(.footnote) .foregroundStyle(.gray)
 					
 					if let codebaseURL = URL(string: "https://github.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/tree/main/BSA2") {
@@ -166,13 +164,16 @@ struct ContentView: View {
 				} .environment(selectedSession)} else {Color.clear}
 			} //.ignoresSafeArea(edges: .top) //Breaks fullscreen mode...
 			
-			//RIGHT SIDEBAR: PROTOCOL
+			//RIGHT SIDEBAR: ALL ERRORS OR ALLOCATION GENERATION PROTOCOL
 			SideBar(.right, expanded: $rightSidebarExpanded) {
 				VStack { List {
 					if selectedWindow != .allocations {
 						ForEach(errorCollector.errors.sorted(by: {$0.key < $1.key}), id: \.key) { key, conditionReturn in
 							ErrorCollectorItemView(value: conditionReturn, focusIndex: key) { index in
-								withAnimation(standartAnimation) {scrollPosition.scrollTo(id: index)}
+								//withAnimation(standartAnimation) {
+									scrollPosition.scrollTo(id: index.line, anchor: .center)
+									focusState = index
+								//} //The animation just lags
 							}
 						}
 					} else if let selectedAllocation {
@@ -195,11 +196,23 @@ struct ContentView: View {
 			}
 		}
 		
-		//If samples need to be generated, do that here
 		.onAppear {
+			persistentSettings = .fetch(from: modelContext)
+			if let persistentSettings {
+				selectedSession = persistentSettings.lastOpenedSession
+				leftSidebarExpanded = persistentSettings.leftSidebarOpen
+				rightSidebarExpanded = persistentSettings.rightSidebarOpen
+			}
+			
+			//If samples need to be generated, do that here
 			//generateSimpleSampleSession(into: modelContext, studentCount: 75, choiceAmount: 3)
 			//generateSimpleSampleSessionWithRandomizedChoices(into: modelContext, studentCount: 75, choiceAmount: 3)
 		}
+		
+		//Updating the values in the PersistentSettings object
+		.onChange(of: selectedSession) { _,_ in persistentSettings?.lastOpenedSession = selectedSession }
+		.onChange(of: leftSidebarExpanded) { _,_ in persistentSettings?.leftSidebarOpen = leftSidebarExpanded }
+		.onChange(of: rightSidebarExpanded) { _,_ in persistentSettings?.rightSidebarOpen = rightSidebarExpanded }
     }
 }
 

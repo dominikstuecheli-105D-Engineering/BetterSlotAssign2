@@ -29,16 +29,6 @@ import SwiftData
 		self.id = UUID()
 	}
 	
-	//Data transfer object
-	struct DTO: Codable {
-		var name: String
-		var number: Int?
-		var capacity: Int
-		var minParticipantRequirement: Int?
-		var index: Int
-		var id: UUID
-	}
-	
 	//Function to import from CSV formatted as string array
 	required init?(fromStringArray strings: [String], configuration: [Int:RowConfigurator], index: Int) {
 		guard strings.count >= configuration.count else {return nil}

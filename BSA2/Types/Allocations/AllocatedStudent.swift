@@ -16,8 +16,7 @@ import SwiftData
 	var name: String
 	var choices: [Int:Int?]
 	
-	var mandatoryPartnerName: String
-	//var mandatoryPartnerLink: AllocatedStudent? = nil
+	var mandatoryPartnerName: String ///Only the name is stored as a string, not an actual object reference since it isnt really needed.
 	
 	var index: Int
 	var id = UUID()

@@ -19,23 +19,12 @@ protocol PersistentArrayCompatible: PersistentModel {
 	var id: UUID {get}
 }
 
+
+
 extension Array where Element: PersistentArrayCompatible {
 	
-	//Getting a specific element
-	func getIndex(_ index: Int) -> Element? { return first(where: {$0.index == index}) }
+	//MARK: ADDING ELEMENTS
 	
-	//Redoes the position values to always start at 1 and be 1 apart.
-	///**OUTDATED, NOT USED INTERNALLY ANYMORE**
-	mutating func reIndex() {
-		var counter: Int = 1
-		
-		for item in self.indexSorted() {
-			item.index = counter
-			counter += 1
-		}
-	}
-	
-	//Adding elements
 	mutating func add(_ element: Element) {
 		if element.index > self.count { element.index = nextIndex(); self.append(element); return } //If no adjustment to the existing elements is needed, just skip the hassle
 		
@@ -63,7 +52,10 @@ extension Array where Element: PersistentArrayCompatible {
 		add(element)
 	}
 	
-	//Removing elements
+	
+	
+	//MARK: REMOVING ELEMENTS
+	
 	mutating func remove(_ element: Element, from context: ModelContext? = nil) {
 		for item in self.enumerated() {
 			if item.element == element { self.remove(at: item.offset) }
@@ -88,7 +80,10 @@ extension Array where Element: PersistentArrayCompatible {
 		if context != nil && removedElement != nil {context?.delete(removedElement!)} //Fully remove from modelContext if given
 	}
 	
-	//Moving specific elements
+	
+	
+	//MARK: MOVING ELEMENTS
+	
 	mutating func move(_ element: Element, to newIndex: Int) {
 		let oldIndex = element.index
 		
@@ -116,6 +111,10 @@ extension Array where Element: PersistentArrayCompatible {
 		move(element, to: newIndex)
 	}
 	
+	
+	
+	//MARK: OTHER FUNCTIONS
+	
 	//Sorting elements after index
 	func indexSorted() -> Array<Element> {return self.sorted(by: {$0.index < $1.index})}
 	
@@ -126,15 +125,31 @@ extension Array where Element: PersistentArrayCompatible {
 	
 	//The next index
 	func nextIndex() -> Int {return self.count + 1}
+	
+	//Getting a specific element of which only the index is known
+	func getIndex(_ index: Int) -> Element? { return first(where: {$0.index == index}) }
+	
+	//Redoes the position values to always start at 1 and be 1 apart.
+	///**OUTDATED, NOT USED INTERNALLY ANYMORE**
+	mutating func reIndex() {
+		var counter: Int = 1
+		
+		for item in self.indexSorted() {
+			item.index = counter
+			counter += 1
+		}
+	}
 }
 
 
 
+//A Transferable conforming struct that acts as a dummy to SwiftUI and provides app-internal information about the object being moved in the static variables.
 struct ReferenceTransferable: Transferable, Codable {
 	
-	static var originInformation: Any? = nil
-	static var reference: (any PersistentModel)? = nil
+	static var originInformation: Any? = nil ///Case-specific information about the overlying origin not readable from the PersistentModel itself, for example the index of the overlying category
+	static var reference: (any PersistentModel)? = nil ///A reference to the object that is being moved itself, so it doesnt have to be identified by an ID or something
 	
+	//The initialiser is really a function that sets all static variables to the current state. its an initialiser because an object has to be created for SwiftUI anyways
 	init(for object: any PersistentModel, originInformation: Any? = nil) {
 		ReferenceTransferable.reference = object
 		ReferenceTransferable.originInformation = originInformation
@@ -142,7 +157,5 @@ struct ReferenceTransferable: Transferable, Codable {
 	
 	static func reset() { ReferenceTransferable.reference = nil; ReferenceTransferable.originInformation = nil }
 	
-	static var transferRepresentation: some TransferRepresentation {
-		CodableRepresentation(contentType: .data)
-	}
+	static var transferRepresentation: some TransferRepresentation { CodableRepresentation(contentType: .data) }
 }

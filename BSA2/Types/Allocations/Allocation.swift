@@ -40,8 +40,11 @@ import SwiftData
 	var index: Int
 	var id = UUID()
 	
+	var generationDuration: TimeInterval = 0
+	
+	///A string that provides all information about the configuration of an Allocation
 	func propertyString() -> String {
-		return "Glücklichkeits-score: \(happynessScore*100)% | Anzahl Wahlmöglichkeiten: \(choiceAmount) | Zwingende Partner*innen erlauben: \(allowForMandatoryPartners ? "Ja" : "Nein") | Zuteilungsmodus: \(studentBalancing.title()) | Glücklichkeitsfunktion: \(happynessFunction.title()) | Max. Suchtiefe: \(maxSearchDepth), Max, Laufzeit: \(maxTime)s | Zusätzliche Zeit erlauben: \(allowDymanicTime ? "Ja" : "Nein")"
+		return "Glücklichkeits-score: \(happynessScore*100)% | Anzahl Wahlmöglichkeiten: \(choiceAmount) | Zwingende Partner*innen erlauben: \(allowForMandatoryPartners ? "Ja" : "Nein") | Zuteilungsmodus: \(studentBalancing.title()) | Glücklichkeitsfunktion: \(happynessFunction.title()) | Max. Suchtiefe: \(maxSearchDepth), Max, Laufzeit: \(String(format:"%.3f",maxTime))s | Zusätzliche Zeit erlauben: \(allowDymanicTime ? "Ja" : "Nein"), tatsächliche Zeit: \(String(format:"%.3f",generationDuration))s"
 	}
 	
 	init(from session: Session, name: String) {
@@ -69,6 +72,7 @@ extension Allocation {
 		} }
 	}
 	
+	///The type of function used to calculate the happyness score
 	enum HappynessFunction: Codable {
 		case exponentialDivideSuffering
 		case linear
@@ -82,24 +86,18 @@ extension Allocation {
 	}
 	
 	func findPartnerOf(_ student: AllocatedStudent, in category: AllocatedCategory?) -> AllocatedStudent? {
-		if category == nil {
-			return unAllocatedStudents.first(where: {$0.name == student.mandatoryPartnerName})
-		}
-		
-		if let category {
-			return category.students.first(where: {$0.name == student.mandatoryPartnerName})
-		}
-		
+		if category == nil { return unAllocatedStudents.first(where: {$0.name == student.mandatoryPartnerName}) }
+		if let category { return category.students.first(where: {$0.name == student.mandatoryPartnerName}) }
 		return nil
 	}
 	
-	//Special move function because it also needs to take into consideration the unAllocatedStudents array
+	///Special move function because it also needs to take into consideration the unAllocatedStudents array
 	func moveStudentFromTransferable(to newCategoryIndex: Int, at toIndex: Int) {
 		guard let student = ReferenceTransferable.reference as? AllocatedStudent else {return}
 		guard let oldCategoryIndex = ReferenceTransferable.originInformation as? Int else {return}
 		
 		//Inside of unAllocatedStudents
-		if oldCategoryIndex == 0 && newCategoryIndex == 0 { ///category index of 0 is considered as the unAllocatedStudents array
+		if oldCategoryIndex == 0 && newCategoryIndex == 0 { ///category index of 0 is considered the unAllocatedStudents array
 			unAllocatedStudents.move(student, to: toIndex)
 			
 			if let partner = findPartnerOf(student, in: nil) {
