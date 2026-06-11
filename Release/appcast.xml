@@ -3,11 +3,12 @@
     <channel>
         <title>BSA2</title>
         <item>
-            <title>1.0</title>
+            <title>1.0.0</title>
             <pubDate>Thu, 11 Jun 2026 19:11:27 +0200</pubDate>
             <sparkle:version>1</sparkle:version>
-            <sparkle:shortVersionString>1.0</sparkle:shortVersionString>
+            <sparkle:shortVersionString>1.0.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.7</sparkle:minimumSystemVersion>
+			<sparkle:releaseNotesLink>https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/Changelog 1.0.0</sparkle:releaseNotesLink>
             <enclosure url="https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/BSA2%201.0.0.zip" length="1875258" type="application/octet-stream"/>
         </item>
     </channel>

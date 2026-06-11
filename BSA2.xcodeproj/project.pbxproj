@@ -39,11 +39,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B419A4122FDB36AA00D4DF0E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		B44DE1462FCB004700CFD4E3 = {
 			isa = PBXGroup;
 			children = (
 				B419A3452FDB1E1200D4DF0E /* Release */,
 				B44DE1512FCB004700CFD4E3 /* BSA2 */,
+				B419A4122FDB36AA00D4DF0E /* Frameworks */,
 				B44DE1502FCB004700CFD4E3 /* Products */,
 			);
 			sourceTree = "<group>";
