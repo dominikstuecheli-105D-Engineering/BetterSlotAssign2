@@ -14,8 +14,8 @@ import SwiftData
 @Model class PersistentSettings {
 	
 	var lastOpenedSession: Session? = nil
-	var leftSidebarOpen: Bool = false
-	var rightSidebarOpen: Bool = false
+	var leftSidebarOpen: Bool = true
+	var rightSidebarOpen: Bool = true
 	
 	init() {}
 	
