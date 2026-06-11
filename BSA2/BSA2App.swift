@@ -9,6 +9,7 @@
 import SwiftUI
 import SwiftData
 import AppKit
+import Sparkle
 
 
 
@@ -23,6 +24,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 struct BSA2App: App {
 	
 	@NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+	private let updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
 	
     var body: some Scene {
 		WindowGroup {
@@ -32,5 +34,11 @@ struct BSA2App: App {
 		.modelContainer(for: [Session.self, PersistentSettings.self], inMemory: false)
 		.windowToolbarStyle(.unifiedCompact)
 		.windowStyle(.hiddenTitleBar)
+		
+		.commands {
+			CommandGroup(after: .appInfo) {
+				CheckForUpdatesView(updater: updaterController.updater)
+			}
+		}
     }
 }

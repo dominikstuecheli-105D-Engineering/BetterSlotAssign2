@@ -178,7 +178,7 @@ struct ContentView: View {
 						}
 					} else if let selectedAllocation {
 						ForEach(selectedAllocation.documentation.indexSorted()) { entry in
-							Text("\(entry.stepCode) \(entry.type.title()): \(entry.desc)")
+							AllocationDocumentationEntryView(entry: entry)
 						}
 					}
 				} }

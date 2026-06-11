@@ -31,8 +31,8 @@ extension Dictionary where Key == Int, Value == Int? {
 extension Allocation {
 	
 	//Make a documentation entry
-	fileprivate func document(_ stepCode: String, _ type: AllocationDocumentationEntryType, into modelContext: ModelContext, _ desc: String) {
-		let newEntry = AllocationDocumentationEntry(stepCode, index: documentation.nextIndex(), type, desc)
+	fileprivate func document(_ stepCode: String, _ timestamp: TimeInterval, _ type: AllocationDocumentationEntryType, into modelContext: ModelContext, _ desc: String) {
+		let newEntry = AllocationDocumentationEntry(stepCode, timestamp: timestamp, index: documentation.nextIndex(), type, desc)
 		modelContext.insert(newEntry)
 		documentation.add(newEntry)
 	}
@@ -466,10 +466,11 @@ extension Allocation {
 		
 		//Time management
 		let startTime: Date = .now
-		nicePrint("Task started", level: 0)
-		document("", .stageSeperator, into: modelContext, "Automatische Zuteilung begonnen")
-		
 		func timeSinceStart() -> TimeInterval {return -startTime.timeIntervalSinceNow}
+		
+		nicePrint("Task started", level: 0)
+		document("", timeSinceStart(), .stageSeperator, into: modelContext, "Automatische Zuteilung begonnen")
+		
 		func maxTimeExceeded() -> Bool {
 			if allowDymanicTime && !documentation.contains(where: {$0.type == .error}) {
 				maxTime = timeSinceStart() + 5
@@ -479,7 +480,7 @@ extension Allocation {
 			}
 		}
 		func documentTimeExceed(at stepCode: String) {
-			document(stepCode, .exitError, into: modelContext, "Maximale Laufzeit überschritten (\(timeSinceStart().rounded())s): Zuteilung wahrscheinlich nicht möglich. Versuchen sie die Kapazitäten zu erhöhen oder geben sie den Schüler*innen allenfalls mehr Wahlmöglichkeiten.")
+			document(stepCode, timeSinceStart(), .exitError, into: modelContext, "Maximale Laufzeit überschritten (\(timeSinceStart().rounded())s): Zuteilung wahrscheinlich nicht möglich. Versuchen sie die Kapazitäten zu erhöhen oder geben sie den Schüler*innen allenfalls mehr Wahlmöglichkeiten.")
 		}
 		
 		//Starting
@@ -512,7 +513,7 @@ extension Allocation {
 				
 				///1.1.1 Not following to the last category with number n+1
 				if newInstance.index != categoryIndexCounter {
-					document("1.1.1", .exitError, into: modelContext, "Die Nummer von \"\(category.name)\" folgt nicht um +1 der davor. Die Nummern der Kategorien müssen einer anderen um jeweils +1 folgen.")
+					document("1.1.1", timeSinceStart(), .exitError, into: modelContext, "Die Nummer von \"\(category.name)\" folgt nicht um +1 der davor. Die Nummern der Kategorien müssen einer anderen um jeweils +1 folgen.")
 					return
 				} else {
 					categoryIndexCounter += 1
@@ -531,15 +532,15 @@ extension Allocation {
 			} else {
 				///1.1.2 No number given
 				if category.number == nil {
-					document("1.1.2", .exitError, into: modelContext, "\"\(category.name)\" konnte nicht übernommen werden: keine Nummer gegeben")
+					document("1.1.2", timeSinceStart(), .exitError, into: modelContext, "\"\(category.name)\" konnte nicht übernommen werden: keine Nummer gegeben")
 				}
 				///1.1.3 No Capacity given
 				if category.capacity == nil {
-					document("1.1.3", .exitError, into: modelContext, "\"\(category.name)\" konnte nicht übernommen werden: keine Kapazität gegeben")
+					document("1.1.3", timeSinceStart(), .exitError, into: modelContext, "\"\(category.name)\" konnte nicht übernommen werden: keine Kapazität gegeben")
 				}
 				///1.1.4 No min. Member count given
 				if category.minParticipantRequirement == nil {
-					document("1.1.4", .exitError, into: modelContext, "\"\(category.name)\" konnte nicht übernommen werden: keine Mindestanzahl für Teilnehmer gegeben")
+					document("1.1.4", timeSinceStart(), .exitError, into: modelContext, "\"\(category.name)\" konnte nicht übernommen werden: keine Mindestanzahl für Teilnehmer gegeben")
 				}
 			}
 		}
@@ -552,11 +553,11 @@ extension Allocation {
 			for choice in student.choices {
 				///**1.2.1** Is a choice given?
 				if choice.value == nil && choice.key <= choiceAmount {
-					document("1.2.1", .destructiveAction, into: modelContext, "\(student.name) Hat als \(choice.key). Wahl nichts angegeben und wird ab jetzt nicht mehr berücksichtigt.")
+					document("1.2.1", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) Hat als \(choice.key). Wahl nichts angegeben und wird ab jetzt nicht mehr berücksichtigt.")
 					invalid = true
 				///**1.2.2** Is it a valid choice?
 				}else if !categories.contains(where: {$0.index == choice.value}) && choice.key <= choiceAmount {
-					document("1.2.2", .destructiveAction, into: modelContext, "\(student.name) Hat als \(choice.key). Wahl eine Kategorie angegeben, die es nicht gibt und wird ab jetzt nicht mehr berücksichtigt.")
+					document("1.2.2", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) Hat als \(choice.key). Wahl eine Kategorie angegeben, die es nicht gibt und wird ab jetzt nicht mehr berücksichtigt.")
 					invalid = true
 				}
 			}
@@ -567,16 +568,16 @@ extension Allocation {
 				if let partner = session.students.first(where: {$0.name == student.mandatoryPartner}) {
 					if partner.choices.truncated(toLength: choiceAmount) != student.choices.truncated(toLength: choiceAmount) { ///The .truncated() function sorts (SwiftData sometimes shuffles the key-value pairs in the array) and shortens the dictionary to only the used choices so that this check does not return true even tho they are "identical"
 						///**1.2.3.1** Not the same choices
-						document("1.2.3.1", .destructiveAction, into: modelContext, "\(student.name) und \(partner.name) haben nicht identisch gewählt und werden nicht als Partner*innen berücksichtigt.")
+						document("1.2.3.1", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) und \(partner.name) haben nicht identisch gewählt und werden nicht als Partner*innen berücksichtigt.")
 					} else if partner.mandatoryPartner != student.name {
 						///**1.2.3.2** Not chosen as partner in both directions
-						document("1.2.3.2", .destructiveAction, into: modelContext, "\(student.name) und \(partner.name) haben sich nicht gegenseitig als Partner*innen gewählt und werden deshalb nicht als solche berücksichtigt.")
+						document("1.2.3.2", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) und \(partner.name) haben sich nicht gegenseitig als Partner*innen gewählt und werden deshalb nicht als solche berücksichtigt.")
 					} else {
 						foundPartner = partner
 					}
 				} else {
 					///**1.2.3.3** Partner not found
-					document("1.2.3.3", .destructiveAction, into: modelContext, "\(student.name) Hat als zwingender Partner eine Person*innen angegeben, die nicht gefunden wurde.")
+					document("1.2.3.3", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) Hat als zwingender Partner eine Person*innen angegeben, die nicht gefunden wurde.")
 				}
 			}
 			
@@ -598,7 +599,7 @@ extension Allocation {
 			totalCapacity += category.capacity
 		}
 		if mainCategoryArr[0].count > totalCapacity {
-			document("1.3", .exitError, into: modelContext, "Es ist gesamt nicht genügend Kapazität gegeben")
+			document("1.3", timeSinceStart(), .exitError, into: modelContext, "Es ist gesamt nicht genügend Kapazität gegeben")
 			return
 		}
 		
@@ -630,7 +631,7 @@ extension Allocation {
 				if category.count > capacity {
 					overshootFinished = false
 					if await !mainCategoryArr.forcefullyFreeUpSlot(at: categoryIndex, info: infoObject()).possible {
-						document("3.1", .error, into: modelContext, "Kategorie \(categoryIndex) Hat zu viele Teilnehmer (\(category.count)/\(capacity)) von denen niemand bewegt werden kann.")
+						document("3.1", timeSinceStart(), .error, into: modelContext, "Kategorie \(categoryIndex) Hat zu viele Teilnehmer (\(category.count)/\(capacity)) von denen niemand bewegt werden kann.")
 					}
 				}
 				
@@ -648,7 +649,7 @@ extension Allocation {
 				case .deleteCategoriesWithNotEnoughMembers:
 					if capacities[category.index] != 0 {
 						capacities[category.index] = 0
-						document("3.2.1", .error, into: modelContext, "\(category.name) hat nicht genügend Teilnehmer; Teilnehmer werden nun anders verteilt.")
+						document("3.2.1", timeSinceStart(), .error, into: modelContext, "\(category.name) hat nicht genügend Teilnehmer; Teilnehmer werden nun anders verteilt.")
 						overshootFinished = false //So that the overshoot loop is triggered again
 					}
 					
@@ -656,7 +657,7 @@ extension Allocation {
 				case .tryToFillCategoriesWithNotEnoughMembers:
 					undershootFinished = false
 					if await !mainCategoryArr.forcefullyFillSlot(at: category.index, info: infoObject()).possible {
-						document("3.2.2", .error, into: modelContext, "\(category.name) hat nicht genügend Teilnehmer und lässt sich mit niemandem füllen.")
+						document("3.2.2", timeSinceStart(), .error, into: modelContext, "\(category.name) hat nicht genügend Teilnehmer und lässt sich mit niemandem füllen.")
 					}
 					overshootFinished = false //So that the overshoot loop is triggered again
 				} }
@@ -702,7 +703,7 @@ extension Allocation {
 		happynessScore = totalHappynessScore/Double(studentCounter)
 		
 		if documentation.last?.type != .exitError {
-			document("", .stageSeperator, into: modelContext, "Automatische Zuteilung erfolgreich beendet")
+			document("", timeSinceStart(), .stageSeperator, into: modelContext, "Automatische Zuteilung erfolgreich beendet")
 		}
 		
 		progress.currentStep = "Fertig!"

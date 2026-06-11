@@ -57,6 +57,18 @@ import SwiftData
 		
 		self.maxSearchDepth = 6
 	}
+	
+	//Exporting
+	func getExportableCSVTable() -> (table: [[String]], fileName: String) {
+		var returnTable: [[String]] = []
+		
+		for category in categories {
+			returnTable.append(contentsOf: category.makeStringTable(configuration: [0: .name]))
+			returnTable.append(["--------------------------------------------------------------"])
+		}
+		
+		return (table: returnTable, fileName: name)
+	}
 }
 
 
@@ -91,13 +103,15 @@ extension Allocation {
 		return nil
 	}
 	
+	
+	
 	///Special move function because it also needs to take into consideration the unAllocatedStudents array
 	func moveStudentFromTransferable(to newCategoryIndex: Int, at toIndex: Int) {
 		guard let student = ReferenceTransferable.reference as? AllocatedStudent else {return}
 		guard let oldCategoryIndex = ReferenceTransferable.originInformation as? Int else {return}
 		
 		//Inside of unAllocatedStudents
-		if oldCategoryIndex == 0 && newCategoryIndex == 0 { ///category index of 0 is considered the unAllocatedStudents array
+		if oldCategoryIndex == 0 && newCategoryIndex == 0 { ///category index of 0 is the unAllocatedStudents array
 			unAllocatedStudents.move(student, to: toIndex)
 			
 			if let partner = findPartnerOf(student, in: nil) {
@@ -192,17 +206,5 @@ extension Allocation {
 		
 		studentCounter += unAllocatedStudents.count
 		happynessScore = totalHappynessScore/Double(studentCounter)
-	}
-	
-	//Exporting
-	func getExportableCSVTable() -> (table: [[String]], fileName: String) {
-		var returnTable: [[String]] = []
-		
-		for category in categories {
-			returnTable.append(contentsOf: category.makeStringTable(configuration: [0: .name]))
-			returnTable.append(["--------------------------------------------------------------"])
-		}
-		
-		return (table: returnTable, fileName: name)
 	}
 }

@@ -1,0 +1,14 @@
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>BSA2</title>
+        <item>
+            <title>1.0</title>
+            <pubDate>Thu, 11 Jun 2026 19:11:27 +0200</pubDate>
+            <sparkle:version>1</sparkle:version>
+            <sparkle:shortVersionString>1.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.7</sparkle:minimumSystemVersion>
+            <enclosure url="BSA2%201.0.0.zip" length="1875258" type="application/octet-stream"/>
+        </item>
+    </channel>
+</rss>

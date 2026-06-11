@@ -37,5 +37,14 @@
 			</dict>
 		</dict>
 	</array>
+	
+	<key>SUFeedURL</key>
+		<string>https://github.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/tree/main/BSA2/main/Release/appcast.xml</string>
+		
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	
+	<key>SUPublicEDKey</key>
+	<string>dB8bcs01eeBwk8ElzNaJt9zTB6CvSbELBe2sMemP554=</string>
 </dict>
 </plist>
