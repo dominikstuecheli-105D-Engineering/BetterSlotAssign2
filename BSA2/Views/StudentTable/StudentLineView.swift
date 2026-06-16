@@ -38,7 +38,6 @@ struct StudentLineView: View {
 			}
 		}
 		.fixedSize(horizontal: false, vertical: true)
-		.id(student.index)
 		
 		//Drag&Drop
 		.draggable(ReferenceTransferable(for: student)) {Color.clear}

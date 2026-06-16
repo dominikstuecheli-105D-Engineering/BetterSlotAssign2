@@ -41,7 +41,7 @@ struct StudentTableView: View {
 			VDivider()
 			
 			ScrollView { LazyVStack(spacing: 0) {
-				ForEach(session.students.indexSorted()) { student in
+				ForEach(session.students.indexSorted(), id: \.id) { student in
 					StudentLineView(student: student, focusState: $focusState)
 					
 					VDivider()
@@ -63,7 +63,7 @@ struct StudentTableView: View {
 						
 						//Setting the focusState to the name field of the newly added student. Delayed to give SwiftUI time to build the views... :(
 						DispatchQueue.main.asyncAfter(deadline: .now()+0.1) {
-							scrollPosition.scrollTo(id: newStudent.index)
+							scrollPosition.scrollTo(id: newStudent.id)
 							focusState = CellIndex(item: newStudent, row: 1)
 						}
 						return .handled
@@ -77,7 +77,7 @@ struct StudentTableView: View {
 						let previousStudentIndex = currentlySelectedStudentIndex-1
 						
 						DispatchQueue.main.asyncAfter(deadline: .now()+0.1) {
-							scrollPosition.scrollTo(id: previousStudentIndex)
+							scrollPosition.scrollTo(id: session.students.getIndex(previousStudentIndex)?.id ?? UUID())
 							focusState = CellIndex(line: previousStudentIndex, row: 1)
 						}
 						return .handled

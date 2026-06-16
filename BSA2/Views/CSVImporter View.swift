@@ -114,14 +114,6 @@ struct CSVImporter: View {
 					Text("Beginnen bei Zeile:")
 					TextField("Zeile", value: $instructionSet.firstLine, format: .number) .frame(width: 40)
 						.onChange(of: instructionSet.firstLine) { _,_ in
-							if instructionSet.firstLine <= 1 {instructionSet.firstLine = 1}
-							parse()
-						}
-					
-					Text("Berücksichtigte Spalten:")
-					TextField("Spalten", value: $instructionSet.rowCount, format: .number) .frame(width: 40)
-						.onChange(of: instructionSet.rowCount) { _,_ in
-							if instructionSet.rowCount <= 1 {instructionSet.rowCount = 1}
 							parse()
 						}
 					
@@ -129,6 +121,20 @@ struct CSVImporter: View {
 						Text("Bestehende Liste ergänzen") .tag(false)
 						Text("Bestehende Liste überschreiben") .tag(true)
 					}
+				}
+				
+				HStack {
+					Text("Beginnen bei Spalte:")
+					TextField("Spalte", value: $instructionSet.firstRow, format: .number) .frame(width: 40)
+						.onChange(of: instructionSet.firstRow) { _,_ in
+							parse()
+						}
+					
+					Text("Berücksichtigte Spalten:")
+					TextField("Spalten", value: $instructionSet.rowCount, format: .number) .frame(width: 40)
+						.onChange(of: instructionSet.rowCount) { _,_ in
+							parse()
+						}
 				}
 				
 				//Specific import settings

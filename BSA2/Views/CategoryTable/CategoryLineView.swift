@@ -38,7 +38,6 @@ struct CategoryLineView: View {
 			ConditionalIntegerCell($category.minParticipantRequirement, focusState: $focusState, cellIndex: CellIndex(item: category, row: 4))
 		}
 		.fixedSize(horizontal: false, vertical: true)
-		.id(category.index)
 		
 		//Drag&Drop
 		.draggable(ReferenceTransferable(for: category)) {Color.clear}

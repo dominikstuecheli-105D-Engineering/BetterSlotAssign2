@@ -62,14 +62,25 @@ struct AllocationItemListView: View {
 			}
 		}
 		
+		.padding(isHovering ? standartPadding : 0)
+		
 		.background {
 			if isHovering {
-				Color.gray.opacity(0.1)
+				ZStack {
+					RoundedRectangle(cornerRadius: standartPadding*2)
+						.foregroundStyle(.gray.opacity(0.1))
+					
+					RoundedRectangle(cornerRadius: standartPadding*2)
+						.stroke(lineWidth: 1.5)
+						.foregroundStyle(.gray.opacity(0.3))
+				}
 			}
 		}
 		
 		.onHover { hover in
-			isHovering = hover
+			withAnimation(standartAnimation) {
+				isHovering = hover
+			}
 		}
 		
 		.onTapGesture {

@@ -36,7 +36,7 @@ struct CategoryTableView: View {
 			VDivider()
 			
 			ScrollView { LazyVStack(spacing: 0) {
-				ForEach(session.categories.indexSorted()) { category in
+				ForEach(session.categories.indexSorted(), id: \.id) { category in
 					CategoryLineView(category: category, focusState: $focusState)
 					
 					VDivider()
@@ -58,7 +58,7 @@ struct CategoryTableView: View {
 						
 						//Setting the focusState to the first field of the newly added category. Delayed to give SwiftUI time to build the views... :(
 						DispatchQueue.main.asyncAfter(deadline: .now()+0.1) {
-							scrollPosition.scrollTo(id: newCategory.index)
+							scrollPosition.scrollTo(id: newCategory.id)
 							focusState = CellIndex(item: newCategory, row: 1)
 						}
 						return .handled
@@ -72,7 +72,7 @@ struct CategoryTableView: View {
 						let previousCategoryIndex = currentlySelectedCategoryIndex-1
 						
 						DispatchQueue.main.asyncAfter(deadline: .now()+0.1) {
-							scrollPosition.scrollTo(id: previousCategoryIndex)
+							scrollPosition.scrollTo(id: session.categories.getIndex(previousCategoryIndex)?.id ?? UUID())
 							focusState = CellIndex(line: previousCategoryIndex, row: 1)
 						}
 						return .handled

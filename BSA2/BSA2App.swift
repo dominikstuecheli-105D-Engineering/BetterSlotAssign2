@@ -24,11 +24,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 struct BSA2App: App {
 	
 	@NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-	private let updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+	private let updateController = UpdateController()
 	
     var body: some Scene {
 		WindowGroup {
 			ContentView()
+				.environmentObject(updateController)
 		}
 		
 		.modelContainer(for: [Session.self, PersistentSettings.self], inMemory: false)
@@ -37,7 +38,7 @@ struct BSA2App: App {
 		
 		.commands {
 			CommandGroup(after: .appInfo) {
-				CheckForUpdatesView(updater: updaterController.updater)
+				CheckForUpdatesView(updater: updateController.controller.updater)
 			}
 		}
     }

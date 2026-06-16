@@ -8,11 +8,12 @@
 
 import SwiftUI
 import SwiftData
+import Sparkle
 
 
 
 let standartPadding: CGFloat = 6
-let standartAnimation: Animation = .snappy(duration: 0.2)
+let standartAnimation: Animation = .snappy(duration: 0.15)
 
 
 
@@ -20,6 +21,8 @@ struct ContentView: View {
 	
 	@Environment(\.modelContext) var modelContext
 	@Query(sort: \Session.timestamp, order: .reverse) var sessions: [Session]
+	
+	@EnvironmentObject var updateController: UpdateController
 	
 	@State var selectedSession: Session?
 	@State var selectedWindow: SelectedWindow = .studentTable
@@ -52,13 +55,24 @@ struct ContentView: View {
 			}
 			
 			.overlay(alignment: .bottom) {
-				VStack(spacing: standartPadding) {
-					Text("BetterSlotAssign2 (BSA2)\nCopyright © 2026 Dominik Stücheli. All rights reserved.") .font(.footnote) .foregroundStyle(.gray)
-					
+				VStack(spacing: standartPadding/2) {
 					if let codebaseURL = URL(string: "https://github.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/tree/main/BSA2") {
 						Link("Codebase auf Github (Link)", destination: codebaseURL)
 					}
-				} .padding(standartPadding)
+					
+					Button("Nach Updates suchen (Klicken)") {
+						updateController.controller.updater.checkForUpdates()
+					} .buttonStyle(.plain) .foregroundStyle(.blue)
+					
+					Text("Version \(Bundle.main.appVersion) (Build \(Bundle.main.buildNumber))") .font(.footnote) .foregroundStyle(.gray) .fontWeight(.semibold)
+					
+				}
+				.padding(standartPadding/2)
+				.background {
+					RoundedRectangle(cornerRadius: standartPadding)
+						.foregroundStyle(.thickMaterial)
+				}
+				.padding(standartPadding)
 			}
 			
 			.onChange(of: selectedSession) { _,_ in
@@ -170,10 +184,12 @@ struct ContentView: View {
 					if selectedWindow != .allocations {
 						ForEach(errorCollector.errors.sorted(by: {$0.key < $1.key}), id: \.key) { key, conditionReturn in
 							ErrorCollectorItemView(value: conditionReturn, focusIndex: key) { index in
-								//withAnimation(standartAnimation) {
-									scrollPosition.scrollTo(id: index.line, anchor: .center)
-									focusState = index
-								//} //The animation just lags
+								if selectedWindow == .studentTable {
+									scrollPosition.scrollTo(id: selectedSession?.students.getIndex(index.line)?.id ?? UUID(), anchor: .center)
+								} else if selectedWindow == .categoryTable {
+									scrollPosition.scrollTo(id: selectedSession?.categories.getIndex(index.line)?.id ?? UUID(), anchor: .center)
+								}
+								focusState = index
 							}
 						}
 					} else if let selectedAllocation {

@@ -53,11 +53,12 @@ protocol CSVBlockCodable: CSVBlockEncodable, CSVBlockDecodable {}
 //A class that contains all functions used for CSV Data handling. not really needed as a class but nice as a structure and for the syntax
 class CSV {
 	
-	//For customizable parsing
+	//For parsing settings
 	@Observable class InstructionSet {
 		var encoding: String.Encoding = .utf8
 		var seperator: Character = ";"
 		var firstLine: Int = 1
+		var firstRow: Int = 1
 		var rowCount: Int = 5
 		
 		init() {}
@@ -121,23 +122,31 @@ class CSV {
 		//Finishing touchups
 		
 		//Remove all lines that are before the first line that should be respected
-		if instructionSet.firstLine >= 1 && instructionSet.firstLine < result.count {
-			result.removeFirst(instructionSet.firstLine-1)
-		}
+		instructionSet.firstLine.clamp(lower: 1, upper: result.count)
+		result.removeFirst(instructionSet.firstLine-1)
 		
 		//Line length/cell count standartisation
 		for line in result.enumerated() {
+			
+			let rowCount = instructionSet.rowCount + instructionSet.firstRow-1 //The rows are shortened later
+			
 			//Too short
-			if line.element.count < instructionSet.rowCount {
-				for _ in 1...(instructionSet.rowCount - line.element.count) {
+			if line.element.count < rowCount {
+				for _ in 1...(rowCount - line.element.count) {
 					result[line.offset].append("")
 				}
 			}
 			
 			//Too long
-			if line.element.count > instructionSet.rowCount {
-				result[line.offset].removeLast(line.element.count - instructionSet.rowCount)
+			if line.element.count > rowCount {
+				result[line.offset].removeLast(line.element.count - rowCount)
 			}
+		}
+		
+		//Remove all rows that are before the first row that should be respected
+		instructionSet.firstRow.clamp(lower: 1, upper: .max)
+		for line in result.enumerated() {
+			result[line.offset].removeFirst(instructionSet.firstRow - 1)
 		}
 		
 		return result

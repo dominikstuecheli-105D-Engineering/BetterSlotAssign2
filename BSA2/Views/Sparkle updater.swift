@@ -3,13 +3,16 @@
 //  BSA2
 //
 //  Created by Dominik Stücheli on 11.06.2026.
-//  Copyright © 2026 Dominik Stücheli. All rights reserved.
 //
 
 import Foundation
 import SwiftUI
 import Sparkle
 internal import Combine
+
+
+
+//MARK: MOST CODE HERE IS COPIED FROM THE SPARKLE INSTRUCTIONS AND NOT WRITTEN BY ME
 
 
 
@@ -38,7 +41,34 @@ struct CheckForUpdatesView: View {
 	}
 	
 	var body: some View {
-		Button("Nach Updates suchen", action: updater.checkForUpdates)
+		Button("Nach Updates suchen", action: updater.checkForUpdates) ///Translated to german
 			.disabled(!checkForUpdatesViewModel.canCheckForUpdates)
+	}
+}
+
+
+
+//Wrapper to work with SwiftUI
+@MainActor final class UpdateController: ObservableObject {
+	let controller: SPUStandardUpdaterController
+	
+	init() {
+		controller = SPUStandardUpdaterController(
+			startingUpdater: true,
+			updaterDelegate: nil,
+			userDriverDelegate: nil
+		)
+	}
+}
+
+
+
+extension Bundle {
+	var appVersion: String {
+		infoDictionary?["CFBundleShortVersionString"] as? String ?? "–"
+	}
+	
+	var buildNumber: String {
+		infoDictionary?["CFBundleVersion"] as? String ?? "–"
 	}
 }

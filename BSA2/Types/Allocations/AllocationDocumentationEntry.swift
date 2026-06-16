@@ -57,7 +57,7 @@ enum AllocationDocumentationEntryType: Int, Codable {
 	var id = UUID()
 	
 	var stepCode: String
-	var timestamp: TimeInterval = 0
+	var timestamp: TimeInterval
 	
 	init(_ stepCode: String, timestamp: TimeInterval, index: Int, _ type: AllocationDocumentationEntryType, _ desc: String) {
 		self.type = type
@@ -87,7 +87,7 @@ struct AllocationDocumentationEntryView: View {
 					.foregroundStyle(entry.type.color())
 				
 				VStack {
-					Text("\(entry.stepCode), \(entry.type.title()), bei \(String(format:"%.3f",entry.timestamp))s") .font(.footnote) .foregroundStyle(.gray.opacity(0.6)) .fontWeight(.bold)
+					Text("\(entry.stepCode), \(entry.type.title())" + (entry.type != .manualAction ? ", bei \(String(format:"%.3f",entry.timestamp))s" : "")) .font(.footnote) .foregroundStyle(.gray.opacity(0.6)) .fontWeight(.bold) ///Only display the timestamp when it is not a manual action because only then does it mean something
 						.frame(maxWidth: .infinity, alignment: .leading)
 					Text(entry.desc)
 						.frame(maxWidth: .infinity, alignment: .leading)
