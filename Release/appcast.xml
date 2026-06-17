@@ -8,8 +8,8 @@
             <sparkle:version>1</sparkle:version>
             <sparkle:shortVersionString>1.0.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.7</sparkle:minimumSystemVersion>
-			<sparkle:releaseNotesLink>https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/Changelog%201.0.0.md</sparkle:releaseNotesLink>
-            <enclosure url="https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/BSA2%201.0.0.zip" length="5584244" type="application/octet-stream" sparkle:edSignature="P6GC4KDd3LnNPm2jR3KsRJqd69uWU+UmdjHiLaOe/L9i6YAoz+Cd99g2r1G++lEkei7UYgVl99pTxM9N7D57BQ=="/>
+			<sparkle:releaseNotesLink>https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/Changelog%20 VERSION .md</sparkle:releaseNotesLink>
+            <enclosure url="https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/BSA2%201.0.0.zip" length="1946458" type="application/octet-stream" sparkle:edSignature="2pVEpcVzIliGrpgZXsgOP251aJ04XeBFVcbimKq68zG5wb+hBYOTk1sK8YNmqqGlYIZdXQXn54LHW7A4ZqZ/AA=="/>
         </item>
     </channel>
 </rss>
