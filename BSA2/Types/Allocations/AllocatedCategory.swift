@@ -39,7 +39,7 @@ import SwiftData
 	}
 	
 	func makeStringTable(configuration: [Int:Student.RowConfigurator]) -> [[String]] {
-		return CSV.makeTableFromItems(students, configuration: configuration, header: [
+		return CSV.makeTableFromItems(students.indexSorted(), configuration: configuration, header: [
 			["\(index)", name, "\(students.count) Schüler*innen", "Max: \(capacity)", "Min: \(minParticipants)"],
 			[""]
 		])

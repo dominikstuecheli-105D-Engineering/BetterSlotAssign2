@@ -159,7 +159,7 @@ struct ConditionalTextCell: View {
 			}
 		
 			.onAppear {
-				DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+				DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
 					if let state = ErrorCollector.shared.errors[cellIndex] { conditionState = state }
 				}
 			}
@@ -214,7 +214,7 @@ struct ConditionalIntegerCell: View {
 			}
 		
 			.onAppear {
-				DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+				DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
 					if let state = ErrorCollector.shared.errors[cellIndex] { conditionState = state }
 				}
 			}

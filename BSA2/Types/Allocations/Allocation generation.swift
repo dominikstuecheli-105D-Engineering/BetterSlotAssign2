@@ -212,10 +212,18 @@ class AllocatedStudentDummy: Equatable {
 	let categoryFromChoice: [Int:Int] //Dictionary where the key is the choice index and the value is the category index
 	let choiceFromCategory: [Int:Int] //Dictionary where the key is the category index and the value is the choice index
 	
+	var gender: String
+	var group: String
+	var profile: String
+	
 	init(from student: Student, partnerName: String?, choiceAmount: Int) {
 		self.name = student.name
 		self.id = student.id
 		self.mandatoryPartner = partnerName
+		
+		self.gender = student.gender
+		self.group = student.group
+		self.profile = student.profile
 		
 		var categoryFromChoice: [Int:Int] = [:]
 		var choiceFromCategory: [Int:Int] = [:]

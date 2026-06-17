@@ -16,3 +16,18 @@ extension Int {
 		if self > upper { self = upper }
 	}
 }
+
+
+
+//Easier handling of double optionals
+extension Int?? {
+	func string() -> String {
+		let unwrapped: Int = (self ?? .max) ?? .max
+		if unwrapped == .max {
+			return ""
+		} else {
+			return "\(unwrapped)"
+		}
+	}
+}
+

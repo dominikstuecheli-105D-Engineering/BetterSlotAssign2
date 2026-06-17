@@ -65,7 +65,7 @@ struct CategoryTableView: View {
 					}
 					
 					//Removing the currently selected student
-					if press.key == .upArrow && press.modifiers.contains(.shift) && session.students.count >= 1 {
+					if press.key == .upArrow && press.modifiers.contains(.shift) && session.students.count > 1 {
 						session.categories.remove(itemPosition: currentlySelectedCategoryIndex, from: modelContext)
 						session.provideCellConditionHostsForCategoryTableToErrorCollector()
 						
@@ -90,6 +90,10 @@ struct CategoryTableView: View {
 		}
 		
 		.onAppear {
+			session.provideCellConditionHostsForCategoryTableToErrorCollector()
+		}
+		
+		.onChange(of: session.categories.count) {
 			session.provideCellConditionHostsForCategoryTableToErrorCollector()
 		}
 		

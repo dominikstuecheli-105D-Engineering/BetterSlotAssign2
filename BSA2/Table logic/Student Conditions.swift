@@ -34,22 +34,22 @@ extension Student {
 	
 	//MARK: CHOICES
 	func choiceCondition(index i: Int, value: Int, session: Session) -> ConditionReturn {
-		//Category doesnt exist
-		if !session.categories.contains(where: {$0.number == value}) {
-			return .validButNotAllowed(errorText: "Es existiert keine Kategorie mit dieser Nummer", updateGroup: [])
-		}
-		
 		//Check if the partner exists to already add to the update group
 		var partner: Student? = nil
 		var partnerChoiceCellUpdateGroup: [CellIndex] = []
 		if let foundPartner = session.students.first(where: {$0.name == mandatoryPartner && $0.name != ""}) {
 			partner = foundPartner
-			partnerChoiceCellUpdateGroup = [CellIndex(item: foundPartner, row: i+1)]
+			partnerChoiceCellUpdateGroup = updateGroup(startCell: session.studentTableFirstChoiceRowIndex(), cellCount: session.choiceAmount, line: index)
+		}
+		
+		//Category doesnt exist
+		if !session.categories.contains(where: {$0.number == value}) {
+			return .validButNotAllowed(errorText: "Es existiert keine Kategorie mit dieser Nummer", updateGroup: [])
 		}
 		
 		//Cannot choose the same category twice
 		if choices.contains(where: {$1 == value && $0 != i}) {
-			let updateGroup = updateGroup(startCell: 2, cellCount: session.choiceAmount, line: self.index)
+			let updateGroup = updateGroup(startCell: session.studentTableFirstChoiceRowIndex(), cellCount: session.choiceAmount, line: self.index)
 			
 			return .validButNotAllowed(errorText: "Diese Person hat diese Kategorie schon einmal gewählt", updateGroup: mergeUpdateGroups(updateGroup, partnerChoiceCellUpdateGroup))
 		}
@@ -57,7 +57,7 @@ extension Student {
 		//If student has mandatory Partner, additional conditions apply
 		if let partner {
 			if partner.choices[i] != choices[i] && session.allowForMandatoryPartners {
-				return .validButNotAllowed(errorText: "Zwingende Partner müssen identisch wählen", updateGroup: [CellIndex(item: partner, row: i+1)])
+				return .validButNotAllowed(errorText: "Zwingende Partner müssen identisch wählen", updateGroup: partnerChoiceCellUpdateGroup)
 			}
 		}
 		
@@ -104,15 +104,33 @@ extension Student {
 			
 			for student in students {
 				
+				//Name cell
 				cellConditionHosts[CellIndex(item: student, row: 1)] = TextCellConditionHost(getValue: {return student.name}, update: {_ in student.nameConditon(in: self)})
 				
+				//Gender cell
+				if useGenderField {
+					cellConditionHosts[CellIndex(item: student, row: 2)] = TextCellConditionHost(getValue: {return student.gender}, update: {_ in .met()})
+				}
+				
+				//Group cell
+				if useGroupField {
+					cellConditionHosts[CellIndex(item: student, row: 3)] = TextCellConditionHost(getValue: {return student.group}, update: {_ in .met()})
+				}
+				
+				//Profile cell
+				if useProfileField {
+					cellConditionHosts[CellIndex(item: student, row: 4)] = TextCellConditionHost(getValue: {return student.profile}, update: {_ in .met()})
+				}
+				
+				//Choice cells
 				for choiceIndex in 1...choiceAmount {
-					cellConditionHosts[CellIndex(item: student, row: 1+choiceIndex)] = IntegerCellConditionHost(getValue: {
+					cellConditionHosts[CellIndex(item: student, row: studentTableFirstChoiceRowIndex()-1 + choiceIndex)] = IntegerCellConditionHost(getValue: {
 						if student.choices[choiceIndex] == nil { student.choices[choiceIndex] = nil } //Making sure an entry with that index exists in the dictionary
 						return student.choices[choiceIndex] ?? nil
 					}, update: { input in student.choiceCondition(index: choiceIndex, value: input, session: self)})
 				}
 				
+				//Mandatory partner cell
 				if allowForMandatoryPartners {
 					cellConditionHosts[CellIndex(item: student, row: studentTableRowCount())] = TextCellConditionHost(getValue: {return student.mandatoryPartner}, update: {_ in student.mandatoryPartnerCondition(session: self)})
 				}

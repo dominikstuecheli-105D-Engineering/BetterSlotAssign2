@@ -179,6 +179,9 @@ struct CSVImporter: View {
 								Text("Name") .tag(Student.RowConfigurator.name)
 								Text("Kategoriewahl (von Links nach Rechts)") .tag(Student.RowConfigurator.choice)
 								Text("zwingende Partner") .tag(Student.RowConfigurator.mandatoryPartner)
+								Text("Geschlecht") .tag(Student.RowConfigurator.gender)
+								Text("Klasse/Gruppe") .tag(Student.RowConfigurator.group)
+								Text("Profil") .tag(Student.RowConfigurator.profile)
 							} label: {}
 						} else if importTo == .categoryTable {
 							Picker(selection: $categoryImportRows[i]) {

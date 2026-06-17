@@ -21,6 +21,24 @@ struct AllocationView: View {
 				TitleTextCell(text: "Name")
 				HDivider()
 				
+				if allocation.useGenderField {
+					TitleTextCell(text: "Geschlecht")
+						.frame(maxWidth: smallCellFixedSize)
+					HDivider()
+				}
+				
+				if allocation.useGroupField {
+					TitleTextCell(text: "Klasse")
+						.frame(maxWidth: smallCellFixedSize)
+					HDivider()
+				}
+				
+				if allocation.useProfileField {
+					TitleTextCell(text: "Profil")
+						.frame(maxWidth: smallCellFixedSize)
+					HDivider()
+				}
+				
 				ForEach(1...allocation.choiceAmount, id: \.self) { i in
 					TitleTextCell(text: "\(i). Wahl")
 					HDivider()

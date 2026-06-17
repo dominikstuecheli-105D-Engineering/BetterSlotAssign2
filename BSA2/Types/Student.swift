@@ -14,6 +14,11 @@ import SwiftData
 @Model class Student: PersistentArrayCompatible, CSVCodable {
 	
 	var name: String
+	
+	var gender: String
+	var group: String
+	var profile: String
+	
 	var choices: [Int:Int?]
 	var mandatoryPartner: String
 	
@@ -22,6 +27,9 @@ import SwiftData
 	
 	init(_ name: String = "", choices: [Int:Int?] = [:], index: Int) {
 		self.name = name
+		self.gender = ""
+		self.group = ""
+		self.profile = ""
 		self.choices = choices
 		self.mandatoryPartner = ""
 		self.index = index
@@ -33,15 +41,23 @@ import SwiftData
 		
 		if let nameIndex = configuration.first(where: {$1 == .name}) {
 			self.name = strings[nameIndex.key]
-		} else {
-			self.name = ""
-		}
+		} else { self.name = "" }
+		
+		if let genderIndex = configuration.first(where: {$1 == .gender}) {
+			self.gender = strings[genderIndex.key]
+		} else { self.gender = "" }
+		
+		if let groupIndex = configuration.first(where: {$1 == .group}) {
+			self.group = strings[groupIndex.key]
+		} else { self.group = "" }
+		
+		if let profileIndex = configuration.first(where: {$1 == .profile}) {
+			self.profile = strings[profileIndex.key]
+		} else { self.profile = "" }
 		
 		if let partnerIndex = configuration.first(where: {$1 == .mandatoryPartner}) {
 			self.mandatoryPartner = strings[partnerIndex.key]
-		} else {
-			self.mandatoryPartner = ""
-		}
+		} else { self.mandatoryPartner = "" }
 		
 		self.index = index
 		
@@ -72,6 +88,9 @@ import SwiftData
 	enum RowConfigurator {
 		case disregarded
 		case name
+		case gender
+		case group
+		case profile
 		case choice
 		case mandatoryPartner
 		
@@ -81,20 +100,6 @@ import SwiftData
 				result[i] = .choice
 			}
 			return result
-		}
-	}
-}
-
-
-
-//Easier handling of double optionals
-extension Int?? {
-	func string() -> String {
-		let unwrapped: Int = (self ?? 9999) ?? 9999
-		if unwrapped == 9999 {
-			return ""
-		} else {
-			return "\(unwrapped)"
 		}
 	}
 }

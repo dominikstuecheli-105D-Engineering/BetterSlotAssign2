@@ -25,9 +25,27 @@ import SwiftData
 	var choiceAmount: Int = 3
 	var allowForMandatoryPartners: Bool = true
 	
-	func studentTableRowCount() -> Int { if allowForMandatoryPartners { return choiceAmount+2 } else { return choiceAmount+1 } }
+	var useGenderField: Bool = false
+	var useGroupField: Bool = false
+	var useProfileField: Bool = false
 	
-	init(_ name: String = "neue Zuteilung") {
+	//Table measurements
+	func studentTableFirstChoiceRowIndex() -> Int {
+		var v: Int = 2
+		if useGenderField { v += 1 }
+		if useGroupField { v += 1 }
+		if useProfileField { v += 1 }
+		return v
+	}
+	
+	func studentTableRowCount() -> Int {
+		var v: Int = studentTableFirstChoiceRowIndex()-1
+		v += choiceAmount
+		if allowForMandatoryPartners { v += 1 }
+		return v
+	}
+	
+	init(_ name: String = "neue Sitzung") {
 		let student = Student("", choices: [1:nil, 2:nil, 3:nil], index: 1)
 		let category = Category(index: 1)
 		

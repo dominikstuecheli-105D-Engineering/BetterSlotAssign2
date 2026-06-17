@@ -139,8 +139,17 @@ struct ContentView: View {
 								//Allow for mandatory partners
 								RoundedCornerToggle(title: "Zwingende Partner*innen erlauben", value: Binding(get: {return selectedSession?.allowForMandatoryPartners ?? false}, set: {v in selectedSession?.allowForMandatoryPartners = v}))
 								
-							} else if selectedWindow == .categoryTable {
+								//Toggle gender cell
+								RoundedCornerToggle(title: "Geschlechtsfeld", value: Binding(get: {return selectedSession?.useGenderField ?? false}, set: {v in selectedSession?.useGenderField = v}))
 								
+								//Toggle group cell
+								RoundedCornerToggle(title: "Gruppen/Klassenfeld", value: Binding(get: {return selectedSession?.useGroupField ?? false}, set: {v in selectedSession?.useGroupField = v}))
+								
+								//Toggle profile cell
+								RoundedCornerToggle(title: "Profilfeld", value: Binding(get: {return selectedSession?.useProfileField ?? false}, set: {v in selectedSession?.useProfileField = v}))
+								
+							} else if selectedWindow == .categoryTable {
+								//Not needed
 							} else if selectedWindow == .allocations {
 								if selectedAllocation == nil {
 									NewAllocationButton(selectedAllocation: $selectedAllocation)

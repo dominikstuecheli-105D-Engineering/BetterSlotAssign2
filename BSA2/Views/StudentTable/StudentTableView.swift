@@ -10,6 +10,10 @@ import SwiftUI
 
 
 
+let smallCellFixedSize: CGFloat = 75
+
+
+
 struct StudentTableView: View {
 	
 	@Environment(Session.self) var session: Session
@@ -25,6 +29,24 @@ struct StudentTableView: View {
 			HStack(spacing: 0) {
 				TitleTextCell(text: "Name")
 				HDivider()
+				
+				if session.useGenderField {
+					TitleTextCell(text: "Geschlecht")
+						.frame(maxWidth: smallCellFixedSize)
+					HDivider()
+				}
+				
+				if session.useGroupField {
+					TitleTextCell(text: "Klasse")
+						.frame(maxWidth: smallCellFixedSize)
+					HDivider()
+				}
+				
+				if session.useProfileField {
+					TitleTextCell(text: "Profil")
+						.frame(maxWidth: smallCellFixedSize)
+					HDivider()
+				}
 				
 				ForEach(1...session.choiceAmount, id: \.self) { i in
 					TitleTextCell(text: "\(i). Wahl")
@@ -70,7 +92,7 @@ struct StudentTableView: View {
 					}
 					
 					//Removing the currently selected student
-					if press.key == .upArrow && press.modifiers.contains(.shift) && session.students.count >= 1 {
+					if press.key == .upArrow && press.modifiers.contains(.shift) && session.students.count > 1 {
 						session.students.remove(itemPosition: currentlySelectedStudentIndex, from: modelContext)
 						session.provideCellConditionHostsForStudentTableToErrorCollector()
 						
@@ -99,11 +121,27 @@ struct StudentTableView: View {
 			session.provideCellConditionHostsForStudentTableToErrorCollector()
 		}
 		
+		.onChange(of: session.students.count) { _,_ in
+			session.provideCellConditionHostsForStudentTableToErrorCollector()
+		}
+		
 		.onChange(of: session.choiceAmount) { _,_ in
 			session.provideCellConditionHostsForStudentTableToErrorCollector()
 		}
 		
 		.onChange(of: session.allowForMandatoryPartners) { _,_ in
+			session.provideCellConditionHostsForStudentTableToErrorCollector()
+		}
+		
+		.onChange(of: session.useGenderField) { _,_ in
+			session.provideCellConditionHostsForStudentTableToErrorCollector()
+		}
+		
+		.onChange(of: session.useGroupField) { _,_ in
+			session.provideCellConditionHostsForStudentTableToErrorCollector()
+		}
+		
+		.onChange(of: session.useGenderField) { _,_ in
 			session.provideCellConditionHostsForStudentTableToErrorCollector()
 		}
 		

@@ -24,6 +24,10 @@ import SwiftData
 	var choiceAmount: Int
 	var allowForMandatoryPartners: Bool
 	
+	var useGenderField: Bool
+	var useGroupField: Bool
+	var useProfileField: Bool
+	
 	//Generation settings
 	var studentBalancing: Allocation.StudentBalancing = Allocation.StudentBalancing.deleteCategoriesWithNotEnoughMembers
 	var happynessFunction: Allocation.HappynessFunction = Allocation.HappynessFunction.exponentialDivideSuffering
@@ -55,6 +59,10 @@ import SwiftData
 		self.allowForMandatoryPartners = session.allowForMandatoryPartners
 		self.name = name
 		
+		self.useGenderField = session.useGenderField
+		self.useGroupField = session.useGroupField
+		self.useProfileField = session.useProfileField
+		
 		self.maxSearchDepth = 6
 	}
 	
@@ -62,8 +70,22 @@ import SwiftData
 	func getExportableCSVTable() -> (table: [[String]], fileName: String) {
 		var returnTable: [[String]] = []
 		
-		for category in categories {
-			returnTable.append(contentsOf: category.makeStringTable(configuration: [0: .name]))
+		var rowCounter: Int = 1
+		var configuration: [Int:Student.RowConfigurator] = [0: .name]
+		
+		if useGenderField { configuration[rowCounter] = .gender; rowCounter += 1 }
+		if useGroupField { configuration[rowCounter] = .group; rowCounter += 1 }
+		if useProfileField { configuration[rowCounter] = .profile; rowCounter += 1 }
+		
+		for _ in 1...choiceAmount {
+			configuration[rowCounter] = .choice
+			rowCounter += 1
+		}
+		
+		if allowForMandatoryPartners { configuration[rowCounter] = .mandatoryPartner; rowCounter += 1 }
+		
+		for category in categories.indexSorted() {
+			returnTable.append(contentsOf: category.makeStringTable(configuration: configuration))
 			returnTable.append(["--------------------------------------------------------------"])
 		}
 		

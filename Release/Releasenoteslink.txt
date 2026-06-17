@@ -1,3 +1,5 @@
 Sparkle keeps deleting the link when updating the appcast so its stored here
 
-<sparkle:releaseNotesLink>https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/Changelog%201.0.0.md</sparkle:releaseNotesLink>
+-> UPDATE VERSION NUMBER
+
+<sparkle:releaseNotesLink>https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/Changelog%20 VERSION .md</sparkle:releaseNotesLink>
