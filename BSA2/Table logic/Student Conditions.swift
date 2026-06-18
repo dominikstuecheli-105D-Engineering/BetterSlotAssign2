@@ -78,7 +78,14 @@ extension Student {
 		guard let wantedPartner = session.students.first(where: {$0.name == mandatoryPartner}) else {
 			let updateGroup = BSA2.updateGroup(row: session.studentTableRowCount(), lineCount: session.students.count) //Update all mandatory partner fields
 			
-			return .validButNotAllowed(errorText: "Es existiert keine andere Person mit diesem Namen", updateGroup: updateGroup)
+			let partnerSearchReturn = findMisspelledPartner(in: session)
+			
+			var suggestion: Suggestion? = nil
+			if partnerSearchReturn.partner != nil {
+				suggestion = Suggestion(at: CellIndex(item: self, row: session.studentTableRowCount()), current: mandatoryPartner, suggested: partnerSearchReturn.partner!.name, acceptSuggestion: {_ in self.mandatoryPartner = partnerSearchReturn.partner!.name})
+			}
+			
+			return .validButNotAllowed(errorText: "Es existiert keine andere Person mit diesem Namen. Ist vielleicht \(partnerSearchReturn.partner?.name ?? "-") (\(String(format: "%0.0f", partnerSearchReturn.certainty*100))%) gemeint?", suggestion: suggestion, updateGroup: updateGroup)
 		}
 		
 		//The other person did not choose this person back

@@ -143,7 +143,7 @@ struct ConditionalTextCell: View {
 	@State private var conditionState: ConditionReturn = .met()
 	
 	private func color() -> Color? {
-		return conditionState.getColor()
+		return conditionState.color
 	}
 	
 	init(_ text: Binding<String>, focusState: FocusState<CellIndex?>.Binding, cellIndex: CellIndex) {
@@ -160,17 +160,17 @@ struct ConditionalTextCell: View {
 		
 			.onAppear {
 				DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-					if let state = ErrorCollector.shared.errors[cellIndex] { conditionState = state }
+					if let state = ErrorCollector.shared.cellConditionHosts[cellIndex]?.state { conditionState = state }
 				}
 			}
 		
-			.onChange(of: ErrorCollector.shared.errors[cellIndex]) { _, new in
+			.onChange(of: ErrorCollector.shared.cellConditionHosts[cellIndex]?.state) { _, new in
 				if let new { conditionState = new }
 			}
 		
 		//Error text indicator
 			.overlay(alignment: .trailing) {
-				if let errorText = conditionState.getErrorText() {
+				if let errorText = conditionState.errorText {
 					InformationTextIndicator(errorText)
 						.padding(standartPadding)
 				}
@@ -192,7 +192,7 @@ struct ConditionalIntegerCell: View {
 	@State private var localString: String = ""
 	
 	private func color() -> Color? {
-		return conditionState.getColor()
+		return conditionState.color
 	}
 	
 	init(_ value: Binding<Int?>, focusState: FocusState<CellIndex?>.Binding, cellIndex: CellIndex) {
@@ -215,17 +215,17 @@ struct ConditionalIntegerCell: View {
 		
 			.onAppear {
 				DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-					if let state = ErrorCollector.shared.errors[cellIndex] { conditionState = state }
+					if let state = ErrorCollector.shared.cellConditionHosts[cellIndex]?.state { conditionState = state }
 				}
 			}
 		
-			.onChange(of: ErrorCollector.shared.errors[cellIndex]) { _, new in
+			.onChange(of: ErrorCollector.shared.cellConditionHosts[cellIndex]?.state) { _, new in
 				if let new { conditionState = new }
 			}
 		
 		//Error text indicator
 			.overlay(alignment: .trailing) {
-				if let errorText = conditionState.getErrorText() {
+				if let errorText = conditionState.errorText {
 					InformationTextIndicator(errorText)
 						.padding(standartPadding)
 				}

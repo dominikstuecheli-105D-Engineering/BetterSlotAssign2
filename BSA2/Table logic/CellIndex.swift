@@ -16,7 +16,7 @@ import Foundation
 
 
 //It may be a little less "fast", but much nicer to work with, rather than single-integer values as indices for cells in a table
-nonisolated struct CellIndex: Hashable, Comparable {
+nonisolated struct CellIndex: Hashable {
 	
 	var line: Int
 	var row: Int
@@ -34,7 +34,7 @@ nonisolated struct CellIndex: Hashable, Comparable {
 	//Comparing
 	static func < (lhs: CellIndex, rhs: CellIndex) -> Bool {
 		if lhs.line < rhs.line { return true }
-		if lhs.row < rhs.row { return true }
+		if lhs.line == rhs.line && lhs.row < rhs.row { return true }
 		return false
 	}
 }

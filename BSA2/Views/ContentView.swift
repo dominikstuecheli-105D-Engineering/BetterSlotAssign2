@@ -191,8 +191,8 @@ struct ContentView: View {
 			SideBar(.right, expanded: $rightSidebarExpanded) {
 				VStack { List {
 					if selectedWindow != .allocations {
-						ForEach(errorCollector.errors.sorted(by: {$0.key < $1.key}), id: \.key) { key, conditionReturn in
-							ErrorCollectorItemView(value: conditionReturn, focusIndex: key) { index in
+						ForEach(errorCollector.cellConditionHosts.sorted(by: {$0.key < $1.key}), id: \.key) { key, conditionHost in
+							ErrorCollectorItemView(conditionHost: conditionHost, focusIndex: key) { index in
 								if selectedWindow == .studentTable {
 									scrollPosition.scrollTo(id: selectedSession?.students.getIndex(index.line)?.id ?? UUID(), anchor: .center)
 								} else if selectedWindow == .categoryTable {
