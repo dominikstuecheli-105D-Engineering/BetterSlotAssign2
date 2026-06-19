@@ -45,7 +45,7 @@ import SwiftData
 	
 	init(from student: AllocatedStudentDummy) {
 		self.name = student.name
-		self.choices = student.choiceFromCategory
+		self.choices = student.categoryFromChoice
 		self.gender = student.gender
 		self.group = student.group
 		self.profile = student.profile

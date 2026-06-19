@@ -207,7 +207,7 @@ private actor MultiResultTracker {
 class AllocatedStudentDummy: Equatable {
 	let name: String
 	let id: UUID
-	let mandatoryPartner: String?
+	let mandatoryPartner: String? //CACHE AS OBJECT REFERENCE?
 	
 	let categoryFromChoice: [Int:Int] //Dictionary where the key is the choice index and the value is the category index
 	let choiceFromCategory: [Int:Int] //Dictionary where the key is the category index and the value is the choice index
@@ -420,7 +420,7 @@ extension Array where Element == [AllocatedStudentDummy] {
 		var totalHappynessScoreDelta: Double = 0
 		var additionalLevelCounter = 0
 		
-		//var changelog: [Int] //note down what movements happened to check if something may now be possible that wasnt possible before (At each index show what student count delta has bee achived at that category index)
+		//var changelog: [Int] //note down what movements happened to check if something may now be possible that wasnt possible before (At each index show what student count delta has bee achieved at that category index)
 		
 		while improvementsPossible || currentDepth+additionalLevelCounter <= info.maxSearchDepth {
 			improvementsPossible = false
@@ -432,17 +432,20 @@ extension Array where Element == [AllocatedStudentDummy] {
 				let newLocalInfo = ShuffleInformation(from: info, modifiedDepth: currentDepth + additionalLevelCounter) //New info object with modified maxSearchDepth to not directly run loose but in increasing steps look deeper when needed
 				
 				for category in self.enumerated() { for student in category.element.shuffled() {
-					for choice in student.categoryFromChoice { group.addTask {
+					for choice in student.categoryFromChoice {
+						
 						guard choice.value != category.offset else {return} //Exclude trying to move to self
-						guard choice.key < student.choiceFromCategory[category.offset]! else {return} //Exclude option that would move the student to a worse choice, movement to worse choices is already handled
+						guard choice.key < student.choiceFromCategory[category.offset]! else {return} //Exclude option that would move the student to a worse choice, movement to worse choices is already handled :)
 						
-						var newArr = capturedSelf
-						
-						let forceResult = await newArr.forcefullyMoveStudent(student, from: category.offset, to: choice.value, info: newLocalInfo, currentDepth: currentDepth)
-						guard forceResult.possible else {return}
-						
-						await resultTracker.submit(score: forceResult.scoreDelta, with: newArr)
-					} }
+						group.addTask {
+							var newArr = capturedSelf
+							
+							let forceResult = await newArr.forcefullyMoveStudent(student, from: category.offset, to: choice.value, info: newLocalInfo, currentDepth: currentDepth)
+							guard forceResult.possible else {return}
+							
+							await resultTracker.submit(score: forceResult.scoreDelta, with: newArr)
+						}
+					}
 				} }
 			}
 			
