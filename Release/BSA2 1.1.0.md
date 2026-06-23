@@ -1,5 +1,5 @@
 #	BSA2 1.1.0 (Build 3)
-###	Dominik Stücheli, DATE
+###	Dominik Stücheli, 23. Juni 2026
 
 **Hauptveränderungen**
 - Performance: Weitere Verbesserungen im Kernalgorithmus - Zuteilungen dauern selten mehrere Sekunden. Dadurch konnte die standartmässige Suchtiefe auf 10 gesetzt werden, da der Algorithmus nur selten wirklich davon gebrauch machen muss.
