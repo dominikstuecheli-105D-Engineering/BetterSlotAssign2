@@ -1,5 +1,5 @@
 #	BSA2 1.0.0 (Build 1)
-###	Dominik Stücheli 18. Juni 2026
+###	Dominik Stücheli, 18. Juni 2026
 
 - Initial release
 

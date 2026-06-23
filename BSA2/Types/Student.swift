@@ -25,6 +25,18 @@ import SwiftData
 	var index: Int
 	var id = UUID()
 	
+	//Values for faster condition checking
+	@Transient fileprivate var nameThatHasBeenFormatted: String = ""
+	@Transient fileprivate var localFormattedName: String = ""
+	@Transient var formattedName: String {
+		if nameThatHasBeenFormatted != name {
+			localFormattedName = name.nameFormat()
+			nameThatHasBeenFormatted = name
+		}
+		return localFormattedName
+	}
+	
+	//Initialiser
 	init(_ name: String = "", choices: [Int:Int?] = [:], index: Int) {
 		self.name = name
 		self.gender = ""

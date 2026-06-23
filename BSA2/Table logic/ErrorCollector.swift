@@ -93,7 +93,7 @@ struct Suggestion {
 struct ErrorCollectorItemView: View {
 	
 	var conditionHost: any CellConditionHost
-	var focusIndex: CellIndex
+	var hostIndex: CellIndex
 	var onClick: (CellIndex) -> Void
 	
 	var body: some View {
@@ -106,7 +106,7 @@ struct ErrorCollectorItemView: View {
 				VStack(spacing: standartPadding/2) {
 					Text(conditionHost.state.typeString) .font(.footnote) .foregroundStyle(.gray.opacity(0.6)) .fontWeight(.bold)
 						.frame(maxWidth: .infinity, alignment: .leading)
-					Text("(Zeile \(focusIndex.line), Spalte \(focusIndex.row))") .font(.footnote) .foregroundStyle(.gray.opacity(0.6))
+					Text("(Zeile \(hostIndex.line), Spalte \(hostIndex.row))") .font(.footnote) .foregroundStyle(.gray.opacity(0.6))
 						.frame(maxWidth: .infinity, alignment: .leading)
 					Text(errorText)
 						.frame(maxWidth: .infinity, alignment: .leading)
@@ -132,8 +132,22 @@ struct ErrorCollectorItemView: View {
 							.frame(maxWidth: .infinity, alignment: .leading)
 					}
 				}
+				//.padding([.top, .trailing, .bottom], GlobalCellFocus.shared.state == hostIndex ? standartPadding : 0)
 			}
-			.onTapGesture { onClick(focusIndex) }
+			.onTapGesture { onClick(hostIndex) }
+			
+//			.background {
+//				if GlobalCellFocus.shared.state == hostIndex {
+//					ZStack {
+//						RoundedRectangle(cornerRadius: standartPadding)
+//							.foregroundStyle(.gray.opacity(0.1))
+//						
+//						RoundedRectangle(cornerRadius: standartPadding-0.75)
+//							.stroke(lineWidth: 1.5)
+//							.foregroundStyle(conditionHost.state.color?.opacity(0.6) ?? .gray)
+//					}
+//				}
+//			}
 		}
 	}
 }
@@ -161,6 +175,7 @@ struct ErrorCollectorItemView: View {
 	//Update the state of a specific cell and the given update group
 	fileprivate static func update(at index: CellIndex) {
 		guard let cellConditionHost = ErrorCollector.shared.cellConditionHosts[index] else {return}
+		let startTime: Date = .now
 		
 		let oldUpdateGroup = self.shared.cellConditionHosts[index]?.state.updateGroup ?? [] //The old update group also needs to be updated to revert eventual changes
 		
@@ -180,6 +195,8 @@ struct ErrorCollectorItemView: View {
 				self.shared.cellConditionHosts[updateCellIndex]?.update()
 			}
 		}
+		
+		print("Finished full cell condition update in \(-startTime.timeIntervalSinceNow)s")
 	}
 	
 	private static func reset() {

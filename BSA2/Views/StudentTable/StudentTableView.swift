@@ -17,10 +17,18 @@ let smallCellFixedSize: CGFloat = 75
 struct StudentTableView: View {
 	
 	@Environment(Session.self) var session: Session
-	@FocusState.Binding var focusState: CellIndex?
 	@Binding var scrollPosition: ScrollPosition
 	
 	@Environment(\.modelContext) var modelContext
+	
+	private func fixedRowWidths(session: Session) -> [Int:CGFloat] {
+		var returnValue: [Int:CGFloat] = [1:2*standartPadding]
+		var rowIndex: Int = 3
+		if session.useGenderField { returnValue[rowIndex] = smallCellFixedSize; rowIndex += 1 }
+		if session.useGroupField { returnValue[rowIndex] = smallCellFixedSize; rowIndex += 1 }
+		if session.useProfileField { returnValue[rowIndex] = smallCellFixedSize; rowIndex += 1 }
+		return returnValue
+	}
 	
 	var body: some View {
 		
@@ -28,29 +36,25 @@ struct StudentTableView: View {
 			
 			HStack(spacing: 0) {
 				TitleTextCell(text: "Name")
-				HDivider()
+				//HDivider()
 				
 				if session.useGenderField {
 					TitleTextCell(text: "Geschlecht")
 						.frame(maxWidth: smallCellFixedSize)
-					HDivider()
 				}
 				
 				if session.useGroupField {
 					TitleTextCell(text: "Klasse")
 						.frame(maxWidth: smallCellFixedSize)
-					HDivider()
 				}
 				
 				if session.useProfileField {
 					TitleTextCell(text: "Profil")
 						.frame(maxWidth: smallCellFixedSize)
-					HDivider()
 				}
 				
 				ForEach(1...session.choiceAmount, id: \.self) { i in
 					TitleTextCell(text: "\(i). Wahl")
-					HDivider()
 				}
 				
 				if session.allowForMandatoryPartners {
@@ -59,23 +63,19 @@ struct StudentTableView: View {
 			}
 			.padding(.leading, 2*standartPadding + 1.5)
 			.fixedSize(horizontal: false, vertical: true)
+			.tableLines(lines: 1, rows: session.studentTableRowCount+1, fixedRowWidths: fixedRowWidths(session: session))
 			
 			VDivider()
 			
 			ScrollView { LazyVStack(spacing: 0) {
 				ForEach(session.students.indexSorted(), id: \.id) { student in
-					StudentLineView(student: student, focusState: $focusState)
-					
-					VDivider()
+					StudentLineView(student: student)
 				}
-			} } .scrollPosition($scrollPosition)
+			} .tableLines(lines: session.students.count, rows: session.studentTableRowCount+1, fixedRowWidths: fixedRowWidths(session: session)) } .scrollPosition($scrollPosition) .scrollIndicators(.hidden)
 			
 			//Keyboard shortcuts
 				.onKeyPress { press in
-					let currentlySelectedStudentIndex = focusState?.line ?? 1
-					
-					//Next cell
-					if press.key == .tab { focusState?.increase(rowCount: session.studentTableRowCount()) }
+					let currentlySelectedStudentIndex = GlobalCellFocus.shared.state?.line ?? 1
 					
 					//Adding a student after the currently selected one
 					if press.key == .downArrow && press.modifiers.contains(.shift) {
@@ -86,7 +86,7 @@ struct StudentTableView: View {
 						//Setting the focusState to the name field of the newly added student. Delayed to give SwiftUI time to build the views... :(
 						DispatchQueue.main.asyncAfter(deadline: .now()+0.1) {
 							scrollPosition.scrollTo(id: newStudent.id)
-							focusState = CellIndex(item: newStudent, row: 1)
+							GlobalCellFocus.shared.cellObservedState = CellIndex(item: newStudent, row: 1)
 						}
 						return .handled
 					}
@@ -100,7 +100,7 @@ struct StudentTableView: View {
 						
 						DispatchQueue.main.asyncAfter(deadline: .now()+0.1) {
 							scrollPosition.scrollTo(id: session.students.getIndex(previousStudentIndex)?.id ?? UUID())
-							focusState = CellIndex(line: previousStudentIndex, row: 1)
+							GlobalCellFocus.shared.cellObservedState = CellIndex(line: previousStudentIndex, row: 1)
 						}
 						return .handled
 					}
@@ -109,7 +109,7 @@ struct StudentTableView: View {
 				}
 			
 			//Shortcut dictionary at the bottom
-			if focusState != nil {
+			if GlobalCellFocus.shared.state != nil {
 				VDivider()
 				
 				Text("**[Tab]** = nächstes Feld, **[Shift+downArrow]** = neuer Schüler/neue Schülerin, **[Shift+upArrow]** = Schüler*in löschen") .padding(standartPadding) .foregroundStyle(.gray)

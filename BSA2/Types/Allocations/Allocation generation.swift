@@ -71,34 +71,6 @@ extension Allocation {
 			}
 		}; return totalScore
 	}
-	
-	//Progress
-	fileprivate func calculateProgress(of categoryArr: [[AllocatedStudentDummy]], capacities: [Int], minMembers: [Int]) -> Double {
-		var totalProgress: Double = 0
-		var categoryCounter = 0
-		
-		for category in categoryArr.enumerated() {
-			categoryCounter += 1
-			let studentCount = category.element.count
-			
-			if studentCount >= minMembers[category.offset] && studentCount <= capacities[category.offset] {
-				totalProgress += 1
-				continue
-			}
-			
-			if studentCount < minMembers[category.offset] {
-				totalProgress += Double(studentCount) / Double(minMembers[category.offset])
-				continue
-			}
-			
-			if studentCount > capacities[category.offset] {
-				totalProgress += Double(studentCount - capacities[category.offset]) / Double(capacities[category.offset])
-				continue
-			}
-		}
-		
-		return totalProgress/Double(categoryCounter)
-	}
 }
 
 //Nice-ified print statement
@@ -127,7 +99,6 @@ nonisolated func nicePrint(_ string: String, do execute: Bool = true, level: Int
 //Helper object to transmit progress data to a view
 @MainActor @Observable class AsyncProgress {
 	var currentStep: String = ""
-	var progress: Double = 0
 }
 
 //Helper object to easier give information to functions
@@ -138,7 +109,7 @@ private nonisolated class ShuffleInformation {
 	let minMembers: [Int]
 	let maxSearchDepth: Int
 	var debugMode: Bool
-	var happynessFunction: @Sendable (Int) -> Double
+	var happynessFunction: [Double] ///Key: choice index, value: happyness value
 	
 	//Time management
 	let startTime: Date
@@ -153,13 +124,18 @@ private nonisolated class ShuffleInformation {
 		}
 	}
 	
-	init(choiceAmount: Int, capacities: [Int], minMembers: [Int], maxSearchDepth: Int, startTime: Date, maxTime: TimeInterval, allowDymanicTime: Bool, debugMode: Bool, happynessFunction: @Sendable @escaping (Int) -> Double) {
+	init(choiceAmount: Int, capacities: [Int], minMembers: [Int], maxSearchDepth: Int, startTime: Date, maxTime: TimeInterval, allowDymanicTime: Bool, debugMode: Bool, happynessFunction: @escaping (Int) -> Double) {
 		self.choiceAmount = choiceAmount
 		self.capacities = capacities
 		self.minMembers = minMembers
 		self.maxSearchDepth = maxSearchDepth
 		self.debugMode = debugMode
-		self.happynessFunction = happynessFunction
+		
+		var happynessFunctionCache: [Double] = [0]
+		for n in 1...choiceAmount {
+			happynessFunctionCache.append(happynessFunction(n))
+		}
+		self.happynessFunction = happynessFunctionCache
 		
 		self.startTime = startTime
 		self.maxTime = maxTime
@@ -207,7 +183,7 @@ private actor MultiResultTracker {
 class AllocatedStudentDummy: Equatable {
 	let name: String
 	let id: UUID
-	let mandatoryPartner: String? //CACHE AS OBJECT REFERENCE?
+	var mandatoryPartner: AllocatedStudentDummy?
 	
 	let categoryFromChoice: [Int:Int] //Dictionary where the key is the choice index and the value is the category index
 	let choiceFromCategory: [Int:Int] //Dictionary where the key is the category index and the value is the choice index
@@ -216,10 +192,10 @@ class AllocatedStudentDummy: Equatable {
 	var group: String
 	var profile: String
 	
-	init(from student: Student, partnerName: String?, choiceAmount: Int) {
+	init(from student: Student, partner: AllocatedStudentDummy?, choiceAmount: Int) {
 		self.name = student.name
 		self.id = student.id
-		self.mandatoryPartner = partnerName
+		//self.mandatoryPartner = partner
 		
 		self.gender = student.gender
 		self.group = student.group
@@ -252,30 +228,30 @@ extension Array where Element == [AllocatedStudentDummy] {
 	
 	//MARK: Moving students
 	///This function does not ensure that a move happens. It only executes if it possible or returns false when not possible.
-	nonisolated mutating fileprivate func tryToMoveStudent(_ student: AllocatedStudentDummy, from oldCategory: Int, to newCategory: Int, info: ShuffleInformation) -> (possible: Bool, scoreDelta: Double) {
+	nonisolated mutating fileprivate func tryToMoveStudent(_ student: AllocatedStudentDummy, from oldCategory: Int, to newCategory: Int, info: ShuffleInformation) async -> (possible: Bool, scoreDelta: Double) {
 		//Different code for movement with or without partner
-		if let partner = self[oldCategory].first(where: {$0.name == student.mandatoryPartner}) {
+		if let partner = await student.mandatoryPartner {
 			//Check if there is enough capacity before moving, then move (with partner)
 			if self[newCategory].count <= info.capacities[newCategory]-2 && self[oldCategory].count >= info.minMembers[oldCategory]+2 {
-				let oldScore = info.happynessFunction(student.choiceFromCategory[oldCategory]!)*2 //*2 because of the identical partner
+				let oldScore = info.happynessFunction[student.choiceFromCategory[oldCategory]!]*2 //*2 because of the identical partner
 				
 				self[newCategory].append(student)
 				self[oldCategory].removeAll(where: {$0.id == student.id})
 				self[newCategory].append(partner)
 				self[oldCategory].removeAll(where: {$0.id == partner.id})
 				
-				let newScore = info.happynessFunction(student.choiceFromCategory[newCategory]!)*2
+				let newScore = info.happynessFunction[student.choiceFromCategory[newCategory]!]*2
 				return (true, newScore-oldScore) //Moved student and partner
 			}
 		} else {
 			//Check if there is enough capacity before moving, then move
 			if self[newCategory].count <= info.capacities[newCategory]-1 && self[oldCategory].count >= info.minMembers[oldCategory]+1 {
-				let oldScore = info.happynessFunction(student.choiceFromCategory[oldCategory]!)
+				let oldScore = info.happynessFunction[student.choiceFromCategory[oldCategory]!]
 				
 				self[newCategory].append(student)
 				self[oldCategory].removeAll(where: {$0.id == student.id})
 				
-				let newScore = info.happynessFunction(student.choiceFromCategory[newCategory]!)
+				let newScore = info.happynessFunction[student.choiceFromCategory[newCategory]!]
 				return (true, newScore-oldScore) //Moved student
 			}
 		}; return (false, 0) //Couldnt move
@@ -288,12 +264,12 @@ extension Array where Element == [AllocatedStudentDummy] {
 		
 		let localStartTime: Date = .now
 		
-		let triedMoveResult = tryToMoveStudent(student, from: oldCategory, to: newCategory, info: info)
+		let triedMoveResult = await tryToMoveStudent(student, from: oldCategory, to: newCategory, info: info)
 		if triedMoveResult.possible {return triedMoveResult}
 		
-		if student.mandatoryPartner == nil {
+		if await student.mandatoryPartner == nil {
 			let forceResult = await forcefullyFreeUpSlot(at: newCategory, path: path, info: info, currentDepth: currentDepth+1)
-			let newTriedMoveResult = tryToMoveStudent(student, from: oldCategory, to: newCategory, info: info)
+			let newTriedMoveResult = await tryToMoveStudent(student, from: oldCategory, to: newCategory, info: info)
 			
 			let returnValue = (newTriedMoveResult.possible, forceResult.scoreDelta + newTriedMoveResult.scoreDelta)
 			nicePrint("exited forcefullyMoveStudent() at Level \(currentDepth) after \(-localStartTime.timeIntervalSinceNow)s with return \(returnValue)", do: info.debugMode, level: currentDepth)
@@ -302,7 +278,7 @@ extension Array where Element == [AllocatedStudentDummy] {
 			//When the student has a mandatory partner, two slots need to be vacated
 			let forceResult1 = await forcefullyFreeUpSlot(at: newCategory, path: path, info: info, currentDepth: currentDepth+1)
 			let forceResult2 = await forcefullyFreeUpSlot(at: newCategory, path: path, info: info, currentDepth: currentDepth+1)
-			let newTriedMoveResult = tryToMoveStudent(student, from: oldCategory, to: newCategory, info: info)
+			let newTriedMoveResult = await tryToMoveStudent(student, from: oldCategory, to: newCategory, info: info)
 			
 			let returnValue = (newTriedMoveResult.possible, forceResult1.scoreDelta + forceResult2.scoreDelta + newTriedMoveResult.scoreDelta)
 			nicePrint("exited forcefullyMoveStudent() at Level \(currentDepth) after \(-localStartTime.timeIntervalSinceNow)s with return \(returnValue)", do: info.debugMode, level: currentDepth)
@@ -557,45 +533,52 @@ extension Allocation {
 		}
 		
 		///**1.2** Copying students into mainCategoryArr[0]
+		var studentDummyByName: [String:AllocatedStudentDummy] = [:]
+		var studentsWithValidPartners: [Student] = []
+		
 		for student in session.students {
 			var invalid = false
+			var invalidPartner = false
 			
-			///**1.2** Choice validity
+			///**1.2.1** Choice validity
 			for choice in student.choices {
-				///**1.2.1** Is a choice given?
+				///**1.2.1.1** Is a choice given?
 				if choice.value == nil && choice.key <= choiceAmount {
-					document("1.2.1", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) Hat als \(choice.key). Wahl nichts angegeben und wird ab jetzt nicht mehr berücksichtigt.")
+					document("1.2.1.1", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) Hat als \(choice.key). Wahl nichts angegeben und wird ab jetzt nicht mehr berücksichtigt.")
 					invalid = true
-				///**1.2.2** Is it a valid choice?
+				///**1.2.1.2** Is it a valid choice?
 				}else if !categories.contains(where: {$0.index == choice.value}) && choice.key <= choiceAmount {
-					document("1.2.2", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) Hat als \(choice.key). Wahl eine Kategorie angegeben, die es nicht gibt und wird ab jetzt nicht mehr berücksichtigt.")
+					document("1.2.1.2", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) Hat als \(choice.key). Wahl eine Kategorie angegeben, die es nicht gibt und wird ab jetzt nicht mehr berücksichtigt.")
 					invalid = true
 				}
 			}
 			
-			///**1.2.3** Is the given mandatory partner valid?
-			var foundPartner: Student?
+			///**1.2.2** Is the given mandatory partner valid?
 			if allowForMandatoryPartners && student.mandatoryPartner != "" && !invalid {
 				if let partner = session.students.first(where: {$0.name == student.mandatoryPartner}) {
 					if partner.choices.truncated(toLength: choiceAmount) != student.choices.truncated(toLength: choiceAmount) { ///The .truncated() function sorts (SwiftData sometimes shuffles the key-value pairs in the array) and shortens the dictionary to only the used choices so that this check does not return true even tho they are "identical"
-						///**1.2.3.1** Not the same choices
-						document("1.2.3.1", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) und \(partner.name) haben nicht identisch gewählt und werden nicht als Partner*innen berücksichtigt.")
+						///**1.2.2.1** Not the same choices
+						document("1.2.2.1", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) und \(partner.name) haben nicht identisch gewählt und werden nicht als Partner*innen berücksichtigt.")
+						invalidPartner = true
 					} else if partner.mandatoryPartner != student.name {
-						///**1.2.3.2** Not chosen as partner in both directions
-						document("1.2.3.2", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) und \(partner.name) haben sich nicht gegenseitig als Partner*innen gewählt und werden deshalb nicht als solche berücksichtigt.")
-					} else {
-						foundPartner = partner
+						///**1.2.2.2** Not chosen as partner in both directions
+						document("1.2.2.2", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) und \(partner.name) haben sich nicht gegenseitig als Partner*innen gewählt und werden deshalb nicht als solche berücksichtigt.")
+						invalidPartner = true
 					}
 				} else {
-					///**1.2.3.3** Partner not found
-					document("1.2.3.3", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) Hat als zwingender Partner eine Person*innen angegeben, die nicht gefunden wurde.")
+					///**1.2.2.3** Partner not found
+					document("1.2.2.3", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) Hat als zwingender Partner eine Person*innen angegeben, die nicht gefunden wurde.")
+					invalidPartner = true
 				}
 			}
 			
-			//Create AllocatedStudentDummy instance and insert
+			///**1.3** Create AllocatedStudentDummy instance and insert
 			if !invalid {
-				let newInstance = AllocatedStudentDummy(from: student, partnerName: foundPartner?.name, choiceAmount: choiceAmount)
+				let newInstance = AllocatedStudentDummy(from: student, partner: nil, choiceAmount: choiceAmount)
 				mainCategoryArr[0].append(newInstance)
+				studentDummyByName[newInstance.name] = newInstance
+				
+				if !invalidPartner { studentsWithValidPartners.append(student) }
 			} else {
 				//If invalid, directly bypass the algorithm and go into unAllocatedStudents as AllocatedStudent instance
 				let newInstance = AllocatedStudent(from: student, choiceAmount: choiceAmount)
@@ -604,13 +587,18 @@ extension Allocation {
 			}
 		}
 		
-		///**1.3** Checking if there is enough capacity in total
+		///**1.4** Linking partners
+		for student in studentsWithValidPartners {
+			studentDummyByName[student.name]?.mandatoryPartner = studentDummyByName[student.mandatoryPartner]
+		}
+		
+		///**1.5** Checking if there is enough capacity in total
 		var totalCapacity: Int = 0
 		for category in categories {
 			totalCapacity += category.capacity
 		}
 		if mainCategoryArr[0].count > totalCapacity {
-			document("1.3", timeSinceStart(), .exitError, into: modelContext, "Es ist gesamt nicht genügend Kapazität gegeben")
+			document("1.5", timeSinceStart(), .exitError, into: modelContext, "Es ist gesamt nicht genügend Kapazität gegeben")
 			return
 		}
 		
@@ -624,7 +612,6 @@ extension Allocation {
 		
 		//MARK: Core loops
 		//3. Juggling students around
-		progress.progress = calculateProgress(of: mainCategoryArr, capacities: capacities, minMembers: minMembers)
 		nicePrint("arrived at core loops at \(timeSinceStart())", level: 0)
 		
 		///I'm sorry for the indentation you're about to witness **(^-^)
@@ -648,7 +635,6 @@ extension Allocation {
 				
 				//Safeguard for impossible allocations
 				if maxTimeExceeded() {overshootFinished = true; undershootFinished = true; documentTimeExceed(at: "3.1"); return}
-				progress.progress = calculateProgress(of: mainCategoryArr, capacities: capacities, minMembers: minMembers)
 				
 			} } //END < for categoryIndex in 1...mainCategoryArr.count-1 > //END Overshoot loop
 			
@@ -675,7 +661,6 @@ extension Allocation {
 				
 				//Safeguard for impossible allocations
 				if maxTimeExceeded() {overshootFinished = true; undershootFinished = true; documentTimeExceed(at: "3.2"); return}
-				progress.progress = calculateProgress(of: mainCategoryArr, capacities: capacities, minMembers: minMembers)
 				
 			} } //END < for category in categories > //END Undershoot loop
 			
@@ -687,7 +672,6 @@ extension Allocation {
 			
 			//Safeguard for impossible allocations
 			if maxTimeExceeded() {overshootFinished = true; undershootFinished = true; documentTimeExceed(at: "3.3"); return}
-			progress.progress = calculateProgress(of: mainCategoryArr, capacities: capacities, minMembers: minMembers)
 			
 		} //END Main loop
 		

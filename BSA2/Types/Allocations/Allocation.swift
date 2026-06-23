@@ -46,6 +46,16 @@ import SwiftData
 	
 	var generationDuration: TimeInterval = 0
 	
+	@Transient var studentTableRowCount: Int {
+		var v: Int = 2
+		if useGenderField { v += 1 }
+		if useGroupField { v += 1 }
+		if useProfileField { v += 1 }
+		v += choiceAmount
+		if allowForMandatoryPartners { v += 1 }
+		return v
+	}
+	
 	///A string that provides all information about the configuration of an Allocation
 	func propertyString() -> String {
 		return "Glücklichkeits-score: \(happynessScore*100)% | Anzahl Wahlmöglichkeiten: \(choiceAmount) | Zwingende Partner*innen erlauben: \(allowForMandatoryPartners ? "Ja" : "Nein") | Zuteilungsmodus: \(studentBalancing.title()) | Glücklichkeitsfunktion: \(happynessFunction.title()) | Max. Suchtiefe: \(maxSearchDepth), Max, Laufzeit: \(String(format:"%.3f",maxTime))s | Zusätzliche Zeit erlauben: \(allowDymanicTime ? "Ja" : "Nein"), tatsächliche Zeit: \(String(format:"%.3f",generationDuration))s"
@@ -63,7 +73,7 @@ import SwiftData
 		self.useGroupField = session.useGroupField
 		self.useProfileField = session.useProfileField
 		
-		self.maxSearchDepth = 6
+		self.maxSearchDepth = 10
 	}
 	
 	//Exporting

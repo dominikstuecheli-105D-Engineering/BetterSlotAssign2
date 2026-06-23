@@ -15,42 +15,33 @@ struct StudentLineView: View {
 	@Bindable var student: Student
 	@Environment(Session.self) var session: Session
 	
-	@FocusState.Binding var focusState: CellIndex?
-	
     var body: some View {
 		HStack(spacing: 0) {
 			LineDragAndDropHandle()
-			HDivider()
 			
-			ConditionalTextCell($student.name, focusState: $focusState, cellIndex: CellIndex(item: student, row: 1))
-			HDivider()
+			ConditionalTextCell($student.name, cellIndex: CellIndex(item: student, row: 1))
 			
 			if session.useGenderField {
-				ConditionalTextCell($student.gender, focusState: $focusState, cellIndex: CellIndex(item: student, row: 2))
+				ConditionalTextCell($student.gender, cellIndex: CellIndex(item: student, row: 2))
 					.frame(maxWidth: smallCellFixedSize)
-				HDivider()
 			}
 			
 			if session.useGroupField {
-				ConditionalTextCell($student.group, focusState: $focusState, cellIndex: CellIndex(item: student, row: 3))
+				ConditionalTextCell($student.group, cellIndex: CellIndex(item: student, row: 3))
 					.frame(maxWidth: smallCellFixedSize)
-				HDivider()
 			}
 			
 			if session.useProfileField {
-				ConditionalTextCell($student.profile, focusState: $focusState, cellIndex: CellIndex(item: student, row: 4))
+				ConditionalTextCell($student.profile, cellIndex: CellIndex(item: student, row: 4))
 					.frame(maxWidth: smallCellFixedSize)
-				HDivider()
 			}
 			
 			ForEach(1...session.choiceAmount, id: \.self) { i in
-				ConditionalIntegerCell(Binding(get: {return student.choices[i] ?? nil}, set: {v in student.choices[i] = v}), focusState: $focusState, cellIndex: CellIndex(item: student, row: session.studentTableFirstChoiceRowIndex()-1+i))
-				HDivider()
+				ConditionalIntegerCell(Binding(get: {return student.choices[i] ?? nil}, set: {v in student.choices[i] = v}), cellIndex: CellIndex(item: student, row: session.studentTableFirstChoiceRowIndex-1+i))
 			}
 			
 			if session.allowForMandatoryPartners {
-				
-				ConditionalTextCell($student.mandatoryPartner, focusState: $focusState, cellIndex: CellIndex(item: student, row: session.studentTableRowCount()))
+				ConditionalTextCellWithSuggestionAcceptIndicator($student.mandatoryPartner, cellIndex: CellIndex(item: student, row: session.studentTableRowCount))
 			}
 		}
 		.fixedSize(horizontal: false, vertical: true)

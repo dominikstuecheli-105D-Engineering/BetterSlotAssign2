@@ -91,7 +91,7 @@ private struct NewAllocationSettingsSheet: View {
 						HStack {
 							Text("Maximale Suchtiefe:")
 							TextField("Maximale Suchtiefe", value: $allocation.maxSearchDepth, format: .number) .frame(width: 50)
-							InformationTextIndicator("Wie viele Ebenenen tief der Algorithmus Folgen von Verschiebungen von Schülern maximal prüfen darf. Mit dieser Zahl wächst die Bearbeitungszeit je nach dem exponentiell, zu tiefe Werte geben aber auch unkorrekte Resultate. Am besten im Bereich 4-6 ansetzen oder einfach so lassen wie hier vorgeschlagen. Wenn der Algorithmus viele Ebenenen tief suchen soll, braucht er unter umständen auch viel Zeit, weshalb die maximale Laufzeit auch entsprechend angepasst werden muss.")
+							InformationTextIndicator("Wie viele Ebenenen tief der Algorithmus Folgen von Verschiebungen von Schülern maximal prüfen darf. Mit dieser Zahl wächst die Bearbeitungszeit je nach dem exponentiell, zu tiefe Werte geben aber auch unkorrekte Resultate.")
 						}
 						
 						HStack {
@@ -161,7 +161,7 @@ private struct NewAllocationSettingsSheet: View {
 			Group {
 				VStack {
 					Text("Der Algorithmus versucht die volle Leistung ihrer CPU zu nutzen. Um die maximale Leistung zu erlauben, lassen sie dieses Fenster als vorderstes offen.")
-					Text("\(progress.currentStep) | \(progress.progress*100)%") .opacity(0.7)
+					Text("\(progress.currentStep)") .opacity(0.7)
 					QuoteView()
 				}
 			} .padding()

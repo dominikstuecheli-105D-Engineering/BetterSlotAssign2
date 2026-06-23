@@ -19,32 +19,26 @@ struct AllocatedStudentLineView: View {
 	var body: some View {
 		HStack(spacing: 0) {
 			LineDragAndDropHandle()
-			HDivider()
 			
 			PlainTextCell(text: student.name)
-			HDivider()
 			
 			if allocation.useGenderField {
 				PlainTextCell(text: student.gender)
 					.frame(maxWidth: smallCellFixedSize)
-				HDivider()
 			}
 			
 			if allocation.useGroupField {
 				PlainTextCell(text: student.group)
 					.frame(maxWidth: smallCellFixedSize)
-				HDivider()
 			}
 			
 			if allocation.useProfileField {
 				PlainTextCell(text: student.profile)
 					.frame(maxWidth: smallCellFixedSize)
-				HDivider()
 			}
 			
 			ForEach(1...allocation.choiceAmount, id: \.self) { i in
 				PlainTextCell(text: student.choices[i].string())
-				HDivider()
 			}
 			
 			if allocation.allowForMandatoryPartners {

@@ -17,6 +17,16 @@ let standartAnimation: Animation = .snappy(duration: 0.15)
 
 
 
+//This object is used instead of a FocusState in the ContentView to prevent constant full view rebuilding when the FocusState changes
+@Observable class GlobalCellFocus {
+	static let shared = GlobalCellFocus()
+	
+	var state: CellIndex? = nil ///This is the actual state. it should ONLY be changed by cell views because it is not being observed.
+	var cellObservedState: CellIndex? = nil ///This is the state that should be set from outside the cell views to force a cell view to be focused.
+}
+
+
+
 struct ContentView: View {
 	
 	@Environment(\.modelContext) var modelContext
@@ -30,7 +40,6 @@ struct ContentView: View {
 	
 	@State var errorCollector = ErrorCollector.shared
 	
-	@FocusState var focusState: CellIndex?
 	@State var scrollPosition = ScrollPosition()
 	
 	@State var leftSidebarExpanded: Bool = true
@@ -54,10 +63,10 @@ struct ContentView: View {
 				}
 			}
 			
-			.overlay(alignment: .bottom) {
+			.overlay(alignment: .bottom) { if leftSidebarExpanded {
 				VStack(spacing: standartPadding/2) {
-					if let codebaseURL = URL(string: "https://github.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/tree/main/BSA2") {
-						Link("Codebase auf Github (Link)", destination: codebaseURL)
+					if let codebaseURL = URL(string: "https://github.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/tree/main") {
+						Link("Sourcecode auf Github (Link)", destination: codebaseURL)
 					}
 					
 					Button("Nach Updates suchen (Klicken)") {
@@ -73,7 +82,7 @@ struct ContentView: View {
 						.foregroundStyle(.thickMaterial)
 				}
 				.padding(standartPadding)
-			}
+			} }
 			
 			.onChange(of: selectedSession) { _,_ in
 				selectedAllocation = nil
@@ -116,9 +125,6 @@ struct ContentView: View {
 								selectedSession = nil
 								modelContext.delete(session)
 							}
-							
-							//Timestamp
-							//Text("Erstellt am: \(session.timestamp.formatted(date: .numeric, time: .omitted))") .fontWeight(.semibold) .foregroundStyle(.gray)
 							
 							//Window selector
 							WindowPicker(selectedWindow: $selectedWindow)
@@ -173,9 +179,9 @@ struct ContentView: View {
 					
 					//Main table views
 					if selectedWindow == .studentTable {
-						StudentTableView(focusState: $focusState, scrollPosition: $scrollPosition)
+						StudentTableView(scrollPosition: $scrollPosition)
 					} else if selectedWindow == .categoryTable {
-						CategoryTableView(focusState: $focusState, scrollPosition: $scrollPosition)
+						CategoryTableView(scrollPosition: $scrollPosition)
 					} else if selectedWindow == .allocations {
 						if let selectedAllocation {
 							AllocationView(allocation: selectedAllocation)
@@ -189,16 +195,16 @@ struct ContentView: View {
 			
 			//RIGHT SIDEBAR: ALL ERRORS OR ALLOCATION GENERATION PROTOCOL
 			SideBar(.right, expanded: $rightSidebarExpanded) {
-				VStack { List {
+				List {
 					if selectedWindow != .allocations {
 						ForEach(errorCollector.cellConditionHosts.sorted(by: {$0.key < $1.key}), id: \.key) { key, conditionHost in
-							ErrorCollectorItemView(conditionHost: conditionHost, focusIndex: key) { index in
+							ErrorCollectorItemView(conditionHost: conditionHost, hostIndex: key) { index in
 								if selectedWindow == .studentTable {
 									scrollPosition.scrollTo(id: selectedSession?.students.getIndex(index.line)?.id ?? UUID(), anchor: .center)
 								} else if selectedWindow == .categoryTable {
 									scrollPosition.scrollTo(id: selectedSession?.categories.getIndex(index.line)?.id ?? UUID(), anchor: .center)
 								}
-								focusState = index
+								GlobalCellFocus.shared.state = index
 							}
 						}
 					} else if let selectedAllocation {
@@ -206,7 +212,7 @@ struct ContentView: View {
 							AllocationDocumentationEntryView(entry: entry)
 						}
 					}
-				} }
+				}
 			}
 			
 			.toolbar {

@@ -15,23 +15,17 @@ struct CategoryLineView: View {
 	@Bindable var category: Category
 	@Environment(Session.self) var session: Session
 	
-	@FocusState.Binding var focusState: CellIndex?
-	
     var body: some View {
 		HStack(spacing: 0) {
 			LineDragAndDropHandle()
-			HDivider()
 			
-			ConditionalTextCell($category.name, focusState: $focusState, cellIndex: CellIndex(item: category, row: 1))
-			HDivider()
+			ConditionalTextCell($category.name, cellIndex: CellIndex(item: category, row: 1))
 			
-			ConditionalIntegerCell($category.number, focusState: $focusState, cellIndex: CellIndex(item: category, row: 2))
-			HDivider()
+			ConditionalIntegerCell($category.number, cellIndex: CellIndex(item: category, row: 2))
 			
-			ConditionalIntegerCell($category.capacity, focusState: $focusState, cellIndex: CellIndex(item: category, row: 3))
-			HDivider()
+			ConditionalIntegerCell($category.capacity, cellIndex: CellIndex(item: category, row: 3))
 			
-			ConditionalIntegerCell($category.minParticipantRequirement, focusState: $focusState, cellIndex: CellIndex(item: category, row: 4))
+			ConditionalIntegerCell($category.minParticipantRequirement, cellIndex: CellIndex(item: category, row: 4))
 		}
 		.fixedSize(horizontal: false, vertical: true)
 		

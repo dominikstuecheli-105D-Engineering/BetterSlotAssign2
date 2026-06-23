@@ -50,7 +50,7 @@ import SwiftData
 		self.group = student.group
 		self.profile = student.profile
 		self.index = 1 ///Will be overwritten anyways because its added with .addAtEnd()
-		self.mandatoryPartnerName = student.mandatoryPartner ?? ""
+		self.mandatoryPartnerName = student.mandatoryPartner?.name ?? ""
 	}
 	
 	func makeStringArray(configuration: [Int:Student.RowConfigurator]) -> [String] {

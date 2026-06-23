@@ -13,7 +13,7 @@ import Sparkle
 
 
 
-//App should close fully when window is closed; only on macOS
+//App should close fully when window is closed
 class AppDelegate: NSObject, NSApplicationDelegate {
 	func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { return true }
 }
@@ -37,9 +37,7 @@ struct BSA2App: App {
 		.windowStyle(.hiddenTitleBar)
 		
 		.commands {
-			CommandGroup(after: .appInfo) {
-				CheckForUpdatesView(updater: updateController.controller.updater)
-			}
+			CommandGroup(after: .appInfo) { CheckForUpdatesView(updater: updateController.controller.updater) }
 		}
     }
 }

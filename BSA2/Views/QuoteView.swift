@@ -8,28 +8,28 @@
 
 import SwiftUI
 
+
+
+private let quotes: [String] = [
+	"Trust the process and the programmer, although the latter is not recommended...",
+	"The algorithm is something like O(n^4), thats not that bad right?",
+	"Do you know the story of the precarious race conditions? Oh, wait, the story is gone.",
+	"How fast are swift print() statements? they aren't.",
+	"Is accessing MainActor classes on detached threads safe? probably, Hasnt crashed yet..",
+	"You did remember to properly codesign the release build, right? right?!",
+	"We don't talk about the use of integer-key dictionaries instead of arrays around here...",
+]
+
+
+
 struct QuoteView: View {
     var body: some View {
 		VStack {
-			Text("Trust the process and the programmer, although the latter is not recommended...")
-				.font(.custom("Zapfino", size: 12))
-				.foregroundStyle(.black.opacity(0.7))
-			
-			Text("The algorithm is something like O(n^4), thats not that bad right?")
-				.font(.custom("Zapfino", size: 12))
-				.foregroundStyle(.black.opacity(0.7))
-			
-			Text("Do you know the story of the precarious race conditions? Oh, wait, the story is gone.")
-				.font(.custom("Zapfino", size: 12))
-				.foregroundStyle(.black.opacity(0.7))
-			
-			Text("How fast are swift print() statements? they aren't. (Seriously?)")
-				.font(.custom("Zapfino", size: 12))
-				.foregroundStyle(.black.opacity(0.7))
-			
-			Text("Is accessing MainActor classes on a detached threads safe? probably, Hasnt crashed yet..")
-				.font(.custom("Zapfino", size: 12))
-				.foregroundStyle(.black.opacity(0.7))
+			ForEach(quotes, id: \.self) { quote in
+				Text(quote)
+					.font(.custom("Zapfino", size: 12))
+					.foregroundStyle(.black.opacity(0.7))
+			}
 		}
 		.fixedSize(horizontal: true, vertical: true)
 		.padding()

@@ -30,7 +30,7 @@ import SwiftData
 	var useProfileField: Bool = false
 	
 	//Table measurements
-	func studentTableFirstChoiceRowIndex() -> Int {
+	@Transient var studentTableFirstChoiceRowIndex: Int {
 		var v: Int = 2
 		if useGenderField { v += 1 }
 		if useGroupField { v += 1 }
@@ -38,13 +38,14 @@ import SwiftData
 		return v
 	}
 	
-	func studentTableRowCount() -> Int {
-		var v: Int = studentTableFirstChoiceRowIndex()-1
+	@Transient var studentTableRowCount: Int {
+		var v: Int = studentTableFirstChoiceRowIndex-1
 		v += choiceAmount
 		if allowForMandatoryPartners { v += 1 }
 		return v
 	}
 	
+	//Initialiser
 	init(_ name: String = "neue Sitzung") {
 		let student = Student("", choices: [1:nil, 2:nil, 3:nil], index: 1)
 		let category = Category(index: 1)

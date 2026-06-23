@@ -2,7 +2,7 @@
   "fill-specializations" : [
     {
       "value" : {
-        "automatic-gradient" : "display-p3:0.47059,0.64289,0.87964,1.00000"
+        "automatic-gradient" : "display-p3:0.60570,0.69426,1.00000,1.00000"
       }
     },
     {
@@ -42,9 +42,6 @@
     }
   ],
   "supported-platforms" : {
-    "circles" : [
-      "watchOS"
-    ],
     "squares" : "shared"
   }
 }

@@ -42,3 +42,12 @@ extension String {
 	}
 }
 
+
+
+extension Array where Element == String.Element {
+	///Gets a specific character
+	func char(at index: Int) -> Character? {
+		guard index >= 0 && index <= self.count-1 else {return nil}
+		return self[index]
+	}
+}

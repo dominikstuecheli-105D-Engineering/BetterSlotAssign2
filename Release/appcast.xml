@@ -3,12 +3,25 @@
     <channel>
         <title>BSA2</title>
         <item>
+            <title>1.1.0</title>
+            <pubDate>Tue, 23 Jun 2026 11:37:12 +0200</pubDate>
+            <sparkle:version>3</sparkle:version>
+            <sparkle:shortVersionString>1.1.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.7</sparkle:minimumSystemVersion>
+            <sparkle:releaseNotesLink>https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/BSA2%201.1.0.md</sparkle:releaseNotesLink>
+            <enclosure url="https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/BSA2%201.1.0.zip" length="8376520" type="application/octet-stream" sparkle:edSignature="lQkRJ4gSK4IvtDGdvwx8nO3amfgrzQxEmaYCD4X88/T7Jj2ZrEyF5GBb6gHMZ/im1R6ju7e3QD8vxDKQrwqcBA=="/>
+            <sparkle:deltas>
+                <enclosure url="https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/BSA23-2.delta" sparkle:deltaFrom="2" length="6679382" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="980240" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="CN0cnfBsc7qXAcUqDHMvpOJ/c+pqTgU6bUUnrPXdjeYdk4Rw/r392KTLGVIj3LzO12BHs6+w3140HR1gxyTcCg=="/>
+                <enclosure url="https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/BSA23-1.delta" sparkle:deltaFrom="1" length="6681070" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="980240" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="3dQSSwAX27EBmRmDIizG8VIi9iiiV679oO3s7+5v/RarXWCTFObdD7QqY80086oPYGEdjsFtU9N20tFNWvVIDg=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>1.0.1</title>
             <pubDate>Fri, 19 Jun 2026 08:19:02 +0200</pubDate>
             <sparkle:version>2</sparkle:version>
             <sparkle:shortVersionString>1.0.1</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.7</sparkle:minimumSystemVersion>
-			<sparkle:releaseNotesLink>https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/Changelog%201.0.1.md</sparkle:releaseNotesLink>
+            <sparkle:releaseNotesLink>https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/BSA2%201.0.1.md</sparkle:releaseNotesLink>
             <enclosure url="https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/BSA2%201.0.1.zip" length="4266074" type="application/octet-stream" sparkle:edSignature="aq00SKd9Vg44pJ5El7tmnQYOREhfVNyhxtcLGtOodgX/Tiq5bVuHo8hiwdWG9PJzlf2HZoy+BiWmX41EyI5VAw=="/>
             <sparkle:deltas>
                 <enclosure url="https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/BSA22-1.delta" sparkle:deltaFrom="1" length="62626" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="980240" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="Y5XcA8C8YPizMNbL4WjuawPJRgX6Yws6WwLLjGlq6oEiNx8P187orl6N/jsAbICBWFsJ0kvHXOfKo9aa2KE+Ag=="/>
@@ -20,7 +33,7 @@
             <sparkle:version>1</sparkle:version>
             <sparkle:shortVersionString>1.0.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.7</sparkle:minimumSystemVersion>
-			<sparkle:releaseNotesLink>https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/Changelog%201.0.0.md</sparkle:releaseNotesLink>
+            <sparkle:releaseNotesLink>https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/BSA2%201.0.0.md</sparkle:releaseNotesLink>
             <enclosure url="https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/BSA2%201.0.0.zip" length="4265607" type="application/octet-stream" sparkle:edSignature="11OyamKQFhHZ9SQUnEhdkAeSX5DGo2CoDDka5YqolYBvL/E7WxfvR3iMQGwUOR+30+tFYf1DmarZK12G17uIBg=="/>
         </item>
     </channel>
