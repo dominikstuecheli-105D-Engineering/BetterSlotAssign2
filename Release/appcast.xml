@@ -8,7 +8,7 @@
             <sparkle:version>3</sparkle:version>
             <sparkle:shortVersionString>1.1.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.7</sparkle:minimumSystemVersion>
-            <sparkle:releaseNotesLink>https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/BSA2%201.1.0.md</sparkle:releaseNotesLink>
+            <sparkle:releaseNotesLink>https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/BSA2%201.1.0.html</sparkle:releaseNotesLink>
             <enclosure url="https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/BSA2%201.1.0.zip" length="8376520" type="application/octet-stream" sparkle:edSignature="lQkRJ4gSK4IvtDGdvwx8nO3amfgrzQxEmaYCD4X88/T7Jj2ZrEyF5GBb6gHMZ/im1R6ju7e3QD8vxDKQrwqcBA=="/>
             <sparkle:deltas>
                 <enclosure url="https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/BSA23-2.delta" sparkle:deltaFrom="2" length="6679382" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="980240" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="CN0cnfBsc7qXAcUqDHMvpOJ/c+pqTgU6bUUnrPXdjeYdk4Rw/r392KTLGVIj3LzO12BHs6+w3140HR1gxyTcCg=="/>
@@ -33,7 +33,7 @@
             <sparkle:version>1</sparkle:version>
             <sparkle:shortVersionString>1.0.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.7</sparkle:minimumSystemVersion>
-            <sparkle:releaseNotesLink>https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/BSA2%201.0.0.html</sparkle:releaseNotesLink>
+            <sparkle:releaseNotesLink>https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/BSA2%201.0.0.md</sparkle:releaseNotesLink>
             <enclosure url="https://raw.githubusercontent.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/main/Release/BSA2%201.0.0.zip" length="4265607" type="application/octet-stream" sparkle:edSignature="11OyamKQFhHZ9SQUnEhdkAeSX5DGo2CoDDka5YqolYBvL/E7WxfvR3iMQGwUOR+30+tFYf1DmarZK12G17uIBg=="/>
         </item>
     </channel>
