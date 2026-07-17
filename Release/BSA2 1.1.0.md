@@ -1,8 +1,6 @@
 #	BSA2 1.1.0 (Build 3)
 ###	Dominik Stücheli, 23. Juni 2026
-
-![(Logo)](https://github.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/blob/main/BSA2/105DLogo.png?raw=true)
-
+![](https://github.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/blob/main/BSA2/105DLogo.png?raw=true)
 **Hauptveränderungen**
 - Performance: Weitere Verbesserungen im Kernalgorithmus - Zuteilungen dauern selten mehrere Sekunden. Dadurch konnte die standartmässige Suchtiefe auf 10 gesetzt werden, da der Algorithmus nur selten wirklich davon gebrauch machen muss.
 - Performance: Verbesserungen im Name-matching Algorithmus (~10x schneller) durch Caching bereits berechneter Ähnlichkeitswerten und früheren Abbrüchen bei zu grossen Diskrepanzen von String- oder Subtringlängen
