@@ -12,10 +12,10 @@
 	- **Data Handling** - _Most algorithm files except for the core algorithm_
 	- **LUA** - _All LUA-editing related things, like the Editor (SwiftUI)_
 	- **Table logic** - _Logic handling table stuff like CellIndex, updateGroups and cell conditions with the ErrorCollector_
-	- **Types** -
+	- **Types**
 		- **Allocations** - _All Types related to Allocations and the core algorithm in "Allocation generation"_
 		- **HappynessFunctions** - _The HappynessFunction Type, the Built-in happyness functions and the logic to download/update these from the github repository_
-		- ...(Other files)
+		- ...(Other files with Types)
 	- **Views** - _All SwiftUI things that are not somewhere else_
 - **Release**
 	- appcast.xml - _The appcast file for Sparkle_
