@@ -1,0 +1,28 @@
+#  BetterSlotAssign2
+##	Allocating students to categories of their choice, optimizing for maximum happyness, Because thats what we should optimize for
+###	Dominik Stücheli, 12. August 2026
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/blob/main/BSA2/105DLogo.png?raw=true">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/blob/main/BSA2/105DLogoBright.png?raw=true">
+  <img alt="Logo" src="https://github.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/blob/main/BSA2/105DLogo.png?raw=true">
+</picture>
+## :de: Kommentar für deutschsprachige LeserInnen ("Comment for german readers")
+Sie befinden sich hier auf der Plattform "Github". Diese wird von ProgrammiererInnen international genutzt, weshalb ich der Einfachheit halber grundsätzlich alles auf Englisch schreibe, auch wenn die Sprache der App eigentlich Deutsch ist.
+
+##	What is it? What does it do?
+BetterSlotAssign2 (or BSA2 for short) is a passion project that allocates students to categories based on their first, second, third (and so on) choice. The core algorithm is multithreaded and more or less optimized to always run in under a second. Multiple options are offered to handle categories with too little students: forcefully fill them or delete the category and redistribute the students (This option is why a typical min cost max flow algorithm would not have worked). Happyness is defined by a happyness function, which is a LUA function, compiled at runtime. Custom happyness functions can be made, edited and tested right in the app.
+
+Apart from the core algorithm, BSA2 is a fully fletched SwiftUI App for macOS with the following features:
+- Student Table with cells that check and display if and how their content may cause problems in the allocation process, as well as a most-likely-to-be-meant name suggestion feature, for the extremely likely case that students misspell their mandatory partners name.
+- CSV importing and exporting for student- and category tables as well as finished allocations
+- Explanations for everything that may not be self-explanatory
+- A LUA/Happyness function editing window to make, edit and test custom happyness functions that can used for an allocation
+
+## Why I made this
+My school started using a first come, first served method when allocating students to different things, instead of the before used method of giving students a first, second and third choice, and then distributing evenly. This just resulted in everyone violently refreshing the schoolNet page and the one with the fastest WiFi getting what they want first. This didnt really seem fair to me, especially when the things we were choosing were the subjects for our exams, so I took it upon myself to make things better. The first version of this idea was a prototype coded fully in LUA (called BSA.lua) with a very much temporary Love2D interface, if you could even call it that. The school started using it and it (not to my surprise) didnt work the first time. But, by the time that happened, I had gained a lot of skill with swift and SwiftUI, and decided to make this project, BSA2, a well-built app with a fully fletched UI and a much better core algorithm, as well as a bunch of other QoL things.
+
+## Who uses it, who maintains it, and oh god why is everything in the app in german
+Currently, this app is only used by my (former) school, and specifically tailored to their needs, which is also why everything in the app is in german. Even tho I am no longer attending that school, This project is, for now, maintained in the sense that stuff that does not work for the school will be fixed by myself as fast as possible.
+
+## In case you want to use it yourself
+If you want to use it privately, please, go ahead. If you are a school or some other institution that could seriously use it, I am happy about that! Please contact me so that I can answer any questions and that I know how seriously I have to maintain everything. Just know that this is a hobby I do for fun and not my job.
