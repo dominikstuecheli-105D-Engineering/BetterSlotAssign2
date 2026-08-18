@@ -1,12 +1,12 @@
-#  BetterSlotAssign2
+#  BetterSlotAssign2 (BSA2)
 ##	Allocating students to categories of their choice, optimizing for maximum happyness, Because thats what we should optimize for
-###	Dominik Stücheli, 12. August 2026
+###	Dominik Stücheli, 18. August 2026
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/blob/main/BSA2/105DLogo.png?raw=true">
   <source media="(prefers-color-scheme: light)" srcset="https://github.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/blob/main/BSA2/105DLogoBright.png?raw=true">
   <img alt="Logo" src="https://github.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/blob/main/BSA2/105DLogo.png?raw=true">
 </picture>
-## :de: Kommentar für deutschsprachige LeserInnen ("Comment for german readers")
+## Kommentar für deutschsprachige LeserInnen :de: ("Comment for german readers")
 Sie befinden sich hier auf der Plattform "Github". Diese wird von ProgrammiererInnen international genutzt, weshalb ich der Einfachheit halber grundsätzlich alles auf Englisch schreibe, auch wenn die Sprache der App eigentlich Deutsch ist.
 
 ##	What is it? What does it do?
