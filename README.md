@@ -6,7 +6,8 @@
   <source media="(prefers-color-scheme: light)" srcset="https://github.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/blob/main/BSA2/105DLogoBright.png?raw=true">
   <img alt="Logo" src="https://github.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/blob/main/BSA2/105DLogo.png?raw=true">
 </picture>
-##	Kommentar für deutschsprachige LeserInnen ("Comment for german readers")
+
+##	:de: Kommentar für deutschsprachige LeserInnen ("Comment for german readers")
 Sie befinden sich hier auf der Plattform "Github". Diese wird von ProgrammiererInnen international genutzt, weshalb ich der Einfachheit halber grundsätzlich alles auf Englisch schreibe, auch wenn die Sprache der App eigentlich Deutsch ist.
 
 ##	What is it? What does it do?
