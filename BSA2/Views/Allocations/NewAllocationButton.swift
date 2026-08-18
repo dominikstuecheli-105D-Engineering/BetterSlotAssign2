@@ -41,6 +41,9 @@ private struct NewAllocationSettingsSheet: View {
 	@Environment(\.modelContext) var modelContext
 	@Environment(Session.self) var session: Session
 	
+	@Query(sort: \HappynessFunction.timestamp, order: .reverse) var availableHappynessFunctions: [HappynessFunction]
+	@State var selectedHappynessFunction: HappynessFunction?
+	
 	@Environment(\.dismiss) var dismiss
 	
 	@State var isGenerating: Bool = false
@@ -91,7 +94,7 @@ private struct NewAllocationSettingsSheet: View {
 						HStack {
 							Text("Maximale Suchtiefe:")
 							TextField("Maximale Suchtiefe", value: $allocation.maxSearchDepth, format: .number) .frame(width: 50)
-							InformationTextIndicator("Wie viele Ebenenen tief der Algorithmus Folgen von Verschiebungen von Schülern maximal prüfen darf. Mit dieser Zahl wächst die Bearbeitungszeit je nach dem exponentiell, zu tiefe Werte geben aber auch unkorrekte Resultate.")
+							InformationTextIndicator("Wie viele Ebenenen tief der Algorithmus Folgen von Verschiebungen von Schülern maximal prüfen darf. Mit dieser Zahl wächst die Bearbeitungszeit je nach dem exponentiell, zu tiefe Werte geben aber auch unkorrekte Resultate. Der Algorithmus geht nur selten bis zur maximal erlaubten Tiefe, es ist also nur nötig, das Limit tiefer zu setzen, wenn der Algorithmus zuvor zu lange gebraucht hat.")
 						}
 						
 						HStack {
@@ -103,55 +106,14 @@ private struct NewAllocationSettingsSheet: View {
 				
 				Divider()
 				
-				Picker("Glücklichkeitsfunktion:", selection: $allocation.happynessFunction) {
-					Text(Allocation.HappynessFunction.exponentialDivideSuffering.title())
-						.tag(Allocation.HappynessFunction.exponentialDivideSuffering)
-					Text(Allocation.HappynessFunction.linear.title())
-						.tag(Allocation.HappynessFunction.linear)
-					Text(Allocation.HappynessFunction.exponentialConcentrateSuffering.title())
-						.tag(Allocation.HappynessFunction.exponentialConcentrateSuffering)
-				}
+				Picker("Glücklichkeitsfunktion:", selection: $selectedHappynessFunction) {
+					ForEach(availableHappynessFunctions) { happynessFunction in
+						Text(happynessFunction.name) .tag(happynessFunction)
+					}
+				} .onAppear {selectedHappynessFunction = availableHappynessFunctions.first}
 				
-				switch allocation.happynessFunction {
-				case .exponentialDivideSuffering:
-					HStack {
-						VStack {
-							Image("exponentialDivideSuffering") .resizable() .scaledToFit()
-							Text("Vertikal: H(k,n), Horizontal: k") .opacity(0.7)
-						}
-						VStack {
-							Text(Allocation.HappynessFunction.exponentialDivideSuffering.title()) .bold()
-							Text("H(k,n) = -((k-1)/(n-1))^2 + 1 wobei\nH = gezählte Glücklichkeit,\nk = In Wahl ... (1te, 2te, 3te Wahl etc.),\nn = Anzahl Wahlmöglichkeiten") .opacity(0.7)
-							Divider()
-							Text(verbatim: "Zwei Schüler*innen in 2ter Wahl werden über ein*e Schüler*in in 1er und ein*er Schüler*in in 3er Wahl priorisiert.") .opacity(0.7)
-						}
-					}
-				case .linear:
-					HStack {
-						VStack {
-							Image("linear") .resizable() .scaledToFit()
-							Text("Vertikal: H(k,n), Horizontal: k") .opacity(0.7)
-						}
-						VStack {
-							Text(Allocation.HappynessFunction.linear.title()) .bold()
-							Text("H(k,n) = -(k-1)/(n-1) + 1 wobei\nH = gezählte Glücklichkeit,\nk = In Wahl ... (1te, 2te, 3te Wahl etc.),\nn = Anzahl Wahlmöglichkeiten") .opacity(0.7)
-							Divider()
-							Text(verbatim: "Zwei Schüler*innen in 2ter Wahl sind gleich viel Wert wie ein*e Schüler*in in 1er und ein*er Schüler*in in 3er Wahl.") .opacity(0.7)
-						}
-					}
-				case .exponentialConcentrateSuffering:
-					HStack {
-						VStack {
-							Image("exponentialConcentrateSuffering") .resizable() .scaledToFit()
-							Text("Vertikal: H(k,n), Horizontal: k") .opacity(0.7)
-						}
-						VStack {
-							Text(Allocation.HappynessFunction.exponentialConcentrateSuffering.title()) .bold()
-							Text("H(k,n) = ((k-n)/(n-1))^2 wobei\nH = gezählte Glücklichkeit,\nk = In Wahl ... (1te, 2te, 3te Wahl etc.),\nn = Anzahl Wahlmöglichkeiten") .opacity(0.7)
-							Divider()
-							Text(verbatim: "Ein*e Schüler*in in 1er und ein*er Schüler*in in 3er Wahl werden über zwei Schüler*innen in 2ter Wahl priorisiert.") .opacity(0.7)
-						}
-					}
+				if let selectedHappynessFunction {
+					Text(selectedHappynessFunction.desc) .font(.footnote) .opacity(0.7)
 				}
 			}
 			.padding()
@@ -168,8 +130,9 @@ private struct NewAllocationSettingsSheet: View {
 			
 			//Task that is connected to the views lifecycle so if the sheet is closed the task is terminated
 				.task {
+					guard let selectedHappynessFunction else {return}
 					modelContext.insert(allocation)
-					await allocation.generate(from: session, into: modelContext, progress: progress)
+					await allocation.generate(from: session, into: modelContext, with: selectedHappynessFunction, progress: progress)
 					session.allocations.add(allocation)
 					selectedAllocation = allocation
 					dismiss()

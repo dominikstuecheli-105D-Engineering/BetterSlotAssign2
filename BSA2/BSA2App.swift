@@ -14,14 +14,13 @@ import Sparkle
 
 
 //App should close fully when window is closed
-class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate {
 	func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { return true }
 }
 
 
 
-@main
-struct BSA2App: App {
+@main struct BSA2App: App {
 	
 	@NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 	private let updateController = UpdateController()
@@ -31,13 +30,19 @@ struct BSA2App: App {
 			ContentView()
 				.environmentObject(updateController)
 		}
-		
-		.modelContainer(for: [Session.self, PersistentSettings.self], inMemory: false)
+		.modelContainer(for: [Session.self, PersistentSettings.self, HappynessFunction.self], inMemory: false)
 		.windowToolbarStyle(.unifiedCompact)
 		.windowStyle(.hiddenTitleBar)
 		
 		.commands {
 			CommandGroup(after: .appInfo) { CheckForUpdatesView(updater: updateController.controller.updater) }
 		}
+		
+		Window("Lua Scripting", id: "luaWindow") {
+			LUAScriptingWindow()
+		}
+		.modelContainer(for: [Session.self, PersistentSettings.self, HappynessFunction.self], inMemory: false)
+		.windowToolbarStyle(.unifiedCompact)
+		.windowStyle(.hiddenTitleBar)
     }
 }

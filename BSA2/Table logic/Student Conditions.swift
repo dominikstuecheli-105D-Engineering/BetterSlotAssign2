@@ -18,7 +18,7 @@ extension Student {
 		if name == "" {return .invalid(errorText: "Es muss ein Name gegeben sein")}
 		
 		//There is already another student with the same name
-		if let other = session.students.first(where: {$0.name == name && $0.id != id}) {
+		if let other = session.students.first(where: { $0.name == name && $0.id != id }) {
 			let updateGroup = mergeUpdateGroups(
 				[CellIndex(item: other, row: 1)], //The other students name cell to also mark as identical
 				BSA2.updateGroup(row: session.studentTableRowCount, lineCount: session.students.count) //Whole last row in case name changes mess with the mandatory partner stuff
@@ -37,7 +37,7 @@ extension Student {
 		//Check if the partner exists to already add to the update group
 		var partner: Student? = nil
 		var partnerChoiceCellUpdateGroup: [CellIndex] = []
-		if let foundPartner = session.students.first(where: {$0.name == mandatoryPartner && $0.name != ""}) {
+		if let foundPartner = session.getStudentByName(mandatoryPartner) {
 			partner = foundPartner
 			partnerChoiceCellUpdateGroup = updateGroup(startCell: session.studentTableFirstChoiceRowIndex, cellCount: session.choiceAmount, line: index)
 		}
@@ -75,7 +75,7 @@ extension Student {
 		}
 		
 		//Chose someone who doesnt exist
-		guard let wantedPartner = session.students.first(where: {$0.name == mandatoryPartner}) else {
+		guard let wantedPartner = session.getStudentByName(mandatoryPartner) else {
 			let updateGroup = BSA2.updateGroup(row: session.studentTableRowCount, lineCount: session.students.count) //Update all mandatory partner fields
 			
 			let partnerSearchReturn = findMisspelledPartner(in: session, minimumCertainty: 0.2)
@@ -86,7 +86,7 @@ extension Student {
 			if partnerSearchReturn.partner != nil {
 				suggestion = Suggestion(at: CellIndex(item: self, row: session.studentTableRowCount), current: mandatoryPartner, suggested: partnerSearchReturn.partner!.name, acceptSuggestion: {_ in self.mandatoryPartner = partnerSearchReturn.partner!.name})
 				
-				errorTextAddition = " Ist vielleicht \(partnerSearchReturn.partner!.name) (\(String(format: "%0.0f", partnerSearchReturn.certainty*100))%) gemeint?"
+				errorTextAddition = " Ist vielleicht \(partnerSearchReturn.partner!.name) (\((partnerSearchReturn.certainty*100).decimalPlaces(3))%) gemeint?"
 			}
 			
 			return .validButNotAllowed(errorText: "Es existiert keine andere Person mit diesem Namen."+errorTextAddition, suggestion: suggestion, updateGroup: updateGroup)

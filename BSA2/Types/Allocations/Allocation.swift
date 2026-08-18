@@ -11,7 +11,7 @@ import SwiftData
 
 
 
-@Model class Allocation: PersistentArrayCompatible {
+@Model final class Allocation: PersistentArrayCompatible, SearchTokenProvider {
 	
 	//Content
 	var name: String
@@ -30,10 +30,11 @@ import SwiftData
 	
 	//Generation settings
 	var studentBalancing: Allocation.StudentBalancing = Allocation.StudentBalancing.deleteCategoriesWithNotEnoughMembers
-	var happynessFunction: Allocation.HappynessFunction = Allocation.HappynessFunction.exponentialDivideSuffering
+	//var happynessFunction: Allocation.HappynessFunction = .exponentialDivideSuffering //Removed in 2.0.0
+	var happynessFunctionSnapshot: HappynessFunctionSnapshot? = nil //Added in 2.0.0
 	var maxSearchDepth: Int
 	var maxTime: TimeInterval = 5
-	var allowDymanicTime: Bool = true
+	var allowDymanicTime: Bool = true ///I noticed that I misspelled this, however it has already been in a release version so it has to stay...
 	var debugMode: Bool = false
 	
 	//Result data
@@ -58,7 +59,23 @@ import SwiftData
 	
 	///A string that provides all information about the configuration of an Allocation
 	func propertyString() -> String {
-		return "Glücklichkeits-score: \(happynessScore*100)% | Anzahl Wahlmöglichkeiten: \(choiceAmount) | Zwingende Partner*innen erlauben: \(allowForMandatoryPartners ? "Ja" : "Nein") | Zuteilungsmodus: \(studentBalancing.title()) | Glücklichkeitsfunktion: \(happynessFunction.title()) | Max. Suchtiefe: \(maxSearchDepth), Max, Laufzeit: \(String(format:"%.3f",maxTime))s | Zusätzliche Zeit erlauben: \(allowDymanicTime ? "Ja" : "Nein"), tatsächliche Zeit: \(String(format:"%.3f",generationDuration))s"
+		return "Glücklichkeits-score: \(happynessScore*100)% | Anzahl Wahlmöglichkeiten: \(choiceAmount) | Zwingende Partner*innen erlauben: \(allowForMandatoryPartners ? "Ja" : "Nein") | Zuteilungsmodus: \(studentBalancing.title()) | Glücklichkeitsfunktion: \(happynessFunctionSnapshot?.name ?? "N/A") | Max. Suchtiefe: \(maxSearchDepth), Max, Laufzeit: \(maxTime.decimalPlaces(3)))s | Zusätzliche Zeit erlauben: \(allowDymanicTime ? "Ja" : "Nein"), tatsächliche Zeit: \(generationDuration.decimalPlaces(3)))s"
+	}
+	
+	//Search tokens
+	@Transient var searchTokens: [SearchToken<SearchTokenIdentifiers>] {
+		var returnValue: [SearchToken<SearchTokenIdentifiers>] = [.init(name, identifier: .name)]
+		if let happynessFunctionSnapshot {
+			returnValue.append(.init(happynessFunctionSnapshot.name, identifier: .happynessFunctionSnapshotName))
+		}
+		return returnValue
+	}
+	
+	@Transient var matchingTokensOnLastSearch: Set<TokenIdentifier> = []
+	
+	enum SearchTokenIdentifiers {
+		case name
+		case happynessFunctionSnapshotName
 	}
 	
 	init(from session: Session, name: String) {
@@ -117,17 +134,18 @@ extension Allocation {
 	}
 	
 	///The type of function used to calculate the happyness score
-	enum HappynessFunction: Codable {
-		case exponentialDivideSuffering
-		case linear
-		case exponentialConcentrateSuffering
-		
-		func title() -> String { switch self {
-		case .exponentialDivideSuffering: return "Verteiltes Glück (Exponentiell, empfohlen)"
-		case .linear: return "Verteiltes Glück (Linear)"
-		case .exponentialConcentrateSuffering: return "Konzentriertes Glück (Nicht empfohlen)"
-		} }
-	}
+	//Removed in 2.0.0
+//	enum HappynessFunction: Codable {
+//		case exponentialDivideSuffering
+//		case linear
+//		case exponentialConcentrateSuffering
+//		
+//		func title() -> String { switch self {
+//		case .exponentialDivideSuffering: return "Verteiltes Glück (Exponentiell, empfohlen)"
+//		case .linear: return "Verteiltes Glück (Linear)"
+//		case .exponentialConcentrateSuffering: return "Konzentriertes Glück (Nicht empfohlen)"
+//		} }
+//	}
 	
 	func findPartnerOf(_ student: AllocatedStudent, in category: AllocatedCategory?) -> AllocatedStudent? {
 		if category == nil { return unAllocatedStudents.first(where: {$0.name == student.mandatoryPartnerName}) }
@@ -225,17 +243,19 @@ extension Allocation {
 		var studentCounter = 0
 		
 		for category in categories {
-			for student in category.students {
-				studentCounter += 1
+			studentCounter += category.students.count
+			
+			forStudent: for student in category.students {
 				for choice in student.choices {
-					if choice.value == category.index {
-						totalHappynessScore += happynessScore(inChoice: choice.key)
-						break
-					}
+					guard choice.value == category.index else {continue}
+					guard student.happynessScores.count-1 >= choice.key else {break forStudent} //Because this property was added in 2.0.0, it is possible that an AllocatedStudent Object does not have it properly
+					totalHappynessScore += student.happynessScores[choice.key]
+					continue forStudent
 				}
 			}
 		}
 		
+		print("counter: \(studentCounter), score: \(happynessScore)")
 		studentCounter += unAllocatedStudents.count
 		happynessScore = totalHappynessScore/Double(studentCounter)
 	}

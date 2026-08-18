@@ -18,7 +18,7 @@ let standartAnimation: Animation = .snappy(duration: 0.15)
 
 
 //This object is used instead of a FocusState in the ContentView to prevent constant full view rebuilding when the FocusState changes
-@Observable class GlobalCellFocus {
+@Observable final class GlobalCellFocus {
 	static let shared = GlobalCellFocus()
 	
 	var state: CellIndex? = nil ///This is the actual state. it should ONLY be changed by cell views because it is not being observed.
@@ -33,6 +33,8 @@ struct ContentView: View {
 	@Query(sort: \Session.timestamp, order: .reverse) var sessions: [Session]
 	
 	@EnvironmentObject var updateController: UpdateController
+	@Environment(\.openWindow) var openWindow
+	@Environment(\.colorScheme) private var colorScheme: ColorScheme
 	
 	@State var selectedSession: Session?
 	@State var selectedWindow: SelectedWindow = .studentTable
@@ -41,6 +43,7 @@ struct ContentView: View {
 	@State var errorCollector = ErrorCollector.shared
 	
 	@State var scrollPosition = ScrollPosition()
+	@State var searchString: String = ""
 	
 	@State var leftSidebarExpanded: Bool = true
 	@State var rightSidebarExpanded: Bool = true
@@ -64,24 +67,26 @@ struct ContentView: View {
 			}
 			
 			.overlay(alignment: .bottom) { if leftSidebarExpanded {
-				VStack(spacing: standartPadding/2) {
-					if let codebaseURL = URL(string: "https://github.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/tree/main") {
-						Link("Sourcecode auf Github (Link)", destination: codebaseURL)
+				VStack(spacing: standartPadding) {
+					VStack(spacing: standartPadding/2) {
+						if let codebaseURL = URL(string: "https://github.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/tree/main") {
+							Link("Sourcecode auf Github (Link)", destination: codebaseURL)
+						}
+						
+						Button("Nach Updates suchen (Klicken)") {
+							updateController.controller.updater.checkForUpdates()
+						} .buttonStyle(.plain) .foregroundStyle(.blue)
+						
+						Text("Version \(Bundle.main.appVersion) (Build \(Bundle.main.buildNumber))") .font(.footnote) .foregroundStyle(.gray) .fontWeight(.semibold)
+					}
+					.padding(standartPadding/2)
+					.background {
+						RoundedRectangle(cornerRadius: standartPadding)
+							.foregroundStyle(.thickMaterial)
 					}
 					
-					Button("Nach Updates suchen (Klicken)") {
-						updateController.controller.updater.checkForUpdates()
-					} .buttonStyle(.plain) .foregroundStyle(.blue)
-					
-					Text("Version \(Bundle.main.appVersion) (Build \(Bundle.main.buildNumber))") .font(.footnote) .foregroundStyle(.gray) .fontWeight(.semibold)
-					
-				}
-				.padding(standartPadding/2)
-				.background {
-					RoundedRectangle(cornerRadius: standartPadding)
-						.foregroundStyle(.thickMaterial)
-				}
-				.padding(standartPadding)
+					Image(colorScheme == .dark ? "105DLogo" : "105DLogoBright") .resizable() .scaledToFit()
+				} .padding(standartPadding)
 			} }
 			
 			.onChange(of: selectedSession) { _,_ in
@@ -132,6 +137,11 @@ struct ContentView: View {
 							
 							//Import button
 							CSVImporter(selectedWindow: $selectedWindow)
+							
+							//LUA Scripting
+							RoundedCornerButton("LUA Scripting", imageName: "chevron.left.forwardslash.chevron.right", color: .teal) {
+								openWindow(id: "luaWindow")
+							}
 						}
 						
 						//Line 2
@@ -166,11 +176,17 @@ struct ContentView: View {
 									
 									RoundedCornerTextField("Zuteilungstitel", text: Binding(get: {return selectedAllocation?.name ?? ""}, set: {v in selectedAllocation?.name = v}))
 									
-									Text("Glücklichkeits-Score: \((selectedAllocation?.happynessScore ?? 0)*100)%")
+									Text("Glücklichkeits-Score: \(((selectedAllocation?.happynessScore ?? 0)*100).decimalPlaces(3))%")
 									
 									CSVExporter { return selectedAllocation!.getExportableCSVTable() }
 								}
 							}
+							
+							RoundedCornerSearchField(searchString: $searchString)
+								.onChange(of: searchString) {
+									GlobalCellFocus.shared.cellObservedState = nil
+									GlobalCellFocus.shared.state = nil
+								}
 						}
 					}
 					.padding(standartPadding)
@@ -179,14 +195,14 @@ struct ContentView: View {
 					
 					//Main table views
 					if selectedWindow == .studentTable {
-						StudentTableView(scrollPosition: $scrollPosition)
+						StudentTableView(scrollPosition: $scrollPosition, searchString: $searchString)
 					} else if selectedWindow == .categoryTable {
-						CategoryTableView(scrollPosition: $scrollPosition)
+						CategoryTableView(scrollPosition: $scrollPosition, searchString: $searchString)
 					} else if selectedWindow == .allocations {
 						if let selectedAllocation {
-							AllocationView(allocation: selectedAllocation)
+							AllocationView(allocation: selectedAllocation, searchString: $searchString)
 						} else {
-							AllocationList(selectedAllocation: $selectedAllocation)
+							AllocationList(selectedAllocation: $selectedAllocation, searchString: $searchString)
 						}
 					}
 					
@@ -229,11 +245,12 @@ struct ContentView: View {
 		
 		.onAppear {
 			persistentSettings = .fetch(from: modelContext)
-			if let persistentSettings {
-				selectedSession = persistentSettings.lastOpenedSession
-				leftSidebarExpanded = persistentSettings.leftSidebarOpen
-				rightSidebarExpanded = persistentSettings.rightSidebarOpen
-			}
+			guard let persistentSettings else {return}
+			selectedSession = persistentSettings.lastOpenedSession
+			leftSidebarExpanded = persistentSettings.leftSidebarOpen
+			rightSidebarExpanded = persistentSettings.rightSidebarOpen
+			
+			updateBuiltInHappynessFunctions(in: modelContext)
 			
 			//If samples need to be generated, do that here
 			//generateSimpleSampleSession(into: modelContext, studentCount: 75, choiceAmount: 3)

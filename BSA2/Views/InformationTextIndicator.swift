@@ -10,17 +10,59 @@ import SwiftUI
 
 
 
-struct InformationTextIndicator: View {
+struct InformationTextIndicator<Content: View>: View {
 	
-	let informationText: String
-	@State var showInfoText: Bool = false
+	@State var showPopover: Bool = false
 	
-	init(_ informationText: String) {
-		self.informationText = informationText
+	let content: () -> Content
+	let isDisabled: Bool
+	
+	@State var closePopoverWorkItem: DispatchWorkItem?
+	func setShowPopover(isHovering: Bool) {
+		if isHovering {
+			closePopoverWorkItem?.cancel()
+			showPopover = true
+		} else {
+			closePopoverWorkItem = DispatchWorkItem { showPopover = false }
+			DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: closePopoverWorkItem!)
+		}
+	}
+	
+	///Initialiser with just an information string that is then made into a nice Text view automatically
+	init(_ informationText: String) where Content == AnyView {
+		self.content = { AnyView(
+			Text(informationText)
+				.multilineTextAlignment(.leading)
+				.lineLimit(nil)
+				.frame(width: 400)
+				.padding(standartPadding)
+		)}
+		self.isDisabled = informationText == ""
+	}
+	
+	///Initialiser with a custom view in the popover
+	init(@ViewBuilder _ content: @escaping () -> Content) {
+		self.content = content
+		self.isDisabled = false
+	}
+	
+	///Initialiser with an information string and a custom view that will be displayed below the information Text view
+	init<AdditionalContent: View>(_ informationText: String, @ViewBuilder _ additionalContent: @escaping () -> AdditionalContent) where Content == AnyView {
+		self.content = { AnyView(
+			VStack(spacing: standartPadding) {
+				Text(informationText)
+					.multilineTextAlignment(.leading)
+					.lineLimit(nil)
+					.frame(width: 400)
+				
+				additionalContent()
+			} .padding(standartPadding)
+		)}
+		self.isDisabled = informationText == ""
 	}
 	
 	var body: some View {
-		if informationText != "" {
+		if !isDisabled {
 			Image(systemName: "info.circle") .bold()
 				.padding(standartPadding/2)
 				.background {
@@ -34,16 +76,11 @@ struct InformationTextIndicator: View {
 					}
 				}
 				.padding(standartPadding/2)
+				.onHover { isHovering in setShowPopover(isHovering: isHovering) }
 			
-				.onHover { state in showInfoText = state}
-			
-			//Error text display in popover
-				.popover(isPresented: $showInfoText) {
-					Text(informationText)
-						.multilineTextAlignment(.leading)
-						.lineLimit(nil)
-						.frame(width: 400)
-						.padding(standartPadding)
+				.popover(isPresented: $showPopover) {
+					content()
+						.onHover { isHovering in setShowPopover(isHovering: isHovering) }
 				}
 		}
 	}

@@ -21,20 +21,24 @@ struct AllocatedStudentLineView: View {
 			LineDragAndDropHandle()
 			
 			PlainTextCell(text: student.name)
+				//.markWhenSearchTokenMatched(student, matchingToken: .name)
 			
 			if allocation.useGenderField {
 				PlainTextCell(text: student.gender)
 					.frame(maxWidth: smallCellFixedSize)
+					//.markWhenSearchTokenMatched(student, matchingToken: .gender)
 			}
 			
 			if allocation.useGroupField {
 				PlainTextCell(text: student.group)
 					.frame(maxWidth: smallCellFixedSize)
+					//.markWhenSearchTokenMatched(student, matchingToken: .group)
 			}
 			
 			if allocation.useProfileField {
 				PlainTextCell(text: student.profile)
 					.frame(maxWidth: smallCellFixedSize)
+					//.markWhenSearchTokenMatched(student, matchingToken: .profile)
 			}
 			
 			ForEach(1...allocation.choiceAmount, id: \.self) { i in
@@ -43,6 +47,7 @@ struct AllocatedStudentLineView: View {
 			
 			if allocation.allowForMandatoryPartners {
 				PlainTextCell(text: student.mandatoryPartnerName)
+					//.markWhenSearchTokenMatched(student, matchingToken: .mandatoryPartner)
 			}
 		}
 		.fixedSize(horizontal: false, vertical: true)

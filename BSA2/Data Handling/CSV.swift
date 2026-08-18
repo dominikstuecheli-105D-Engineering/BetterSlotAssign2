@@ -51,10 +51,10 @@ protocol CSVBlockCodable: CSVBlockEncodable, CSVBlockDecodable {}
 
 
 //A class that contains all functions used for CSV Data handling. not really needed as a class but nice as a structure and for the syntax
-class CSV {
+final class CSV {
 	
 	//For parsing settings
-	@Observable class InstructionSet {
+	@Observable final class InstructionSet {
 		var encoding: String.Encoding = .utf8
 		var seperator: Character = ";"
 		var firstLine: Int = 1
@@ -62,23 +62,21 @@ class CSV {
 		var rowCount: Int = 5
 		
 		init() {}
+		
+		init(firstLine: Int, firstRow: Int, rowCount: Int) {
+			self.firstLine = firstLine
+			self.firstRow = firstRow
+			self.rowCount = rowCount
+		}
 	}
 	
 	
 	
-	//MARK: PARSING FROM FILE
+	//MARK: PARSING
 	
-	//Parsing to string array
-	static func parse(url: URL, instructionSet: CSV.InstructionSet) throws -> [[String]] {
-		
-		//Politely ask for access to the file
-		guard url.startAccessingSecurityScopedResource() else {throw CocoaError(.fileReadNoPermission)}
-		
-		//Decode
-		var string = try String(contentsOf: url, encoding: instructionSet.encoding)
-		
-		//Finished with the access
-		url.stopAccessingSecurityScopedResource()
+	//Parsing from CSV string to string array
+	static func parse(_ inputString: String, instructionSet: CSV.InstructionSet) -> [[String]] {
+		var string = inputString
 		
 		//Remove BOM if there
 		if string.hasPrefix("\u{FEFF}") {string.removeFirst()}
@@ -127,7 +125,6 @@ class CSV {
 		
 		//Line length/cell count standartisation
 		for line in result.enumerated() {
-			
 			let rowCount = instructionSet.rowCount + instructionSet.firstRow-1 //The rows are shortened later
 			
 			//Too short
@@ -148,6 +145,21 @@ class CSV {
 		for line in result.enumerated() {
 			result[line.offset].removeFirst(instructionSet.firstRow - 1)
 		}
+		
+		return result
+	}
+	
+	//Parsing directly from a file
+	static func parse(url: URL, instructionSet: CSV.InstructionSet) throws -> [[String]] {
+		//Politely ask for access to the file
+		guard url.startAccessingSecurityScopedResource() else {throw CocoaError(.fileReadNoPermission)}
+		
+		//Decode
+		let string = try String(contentsOf: url, encoding: instructionSet.encoding)
+		let result = parse(string, instructionSet: instructionSet)
+		
+		//Finished with the access
+		url.stopAccessingSecurityScopedResource()
 		
 		return result
 	}

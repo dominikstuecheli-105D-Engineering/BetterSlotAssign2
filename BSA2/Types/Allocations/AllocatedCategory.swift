@@ -11,7 +11,7 @@ import SwiftData
 
 
 
-@Model class AllocatedCategory: PersistentArrayCompatible, CSVBlockEncodable {
+@Model final class AllocatedCategory: PersistentArrayCompatible, CSVBlockEncodable {
 	
 	var name: String
 	var index: Int

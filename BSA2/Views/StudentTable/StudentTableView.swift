@@ -19,6 +19,9 @@ struct StudentTableView: View {
 	@Environment(Session.self) var session: Session
 	@Binding var scrollPosition: ScrollPosition
 	
+	@Binding var searchString: String
+	@State var displayedStudents: [Student] = []
+	
 	@Environment(\.modelContext) var modelContext
 	
 	private func fixedRowWidths(session: Session) -> [Int:CGFloat] {
@@ -68,10 +71,10 @@ struct StudentTableView: View {
 			VDivider()
 			
 			ScrollView { LazyVStack(spacing: 0) {
-				ForEach(session.students.indexSorted(), id: \.id) { student in
+				ForEach(displayedStudents.indexSorted(), id: \.id) { student in
 					StudentLineView(student: student)
 				}
-			} .tableLines(lines: session.students.count, rows: session.studentTableRowCount+1, fixedRowWidths: fixedRowWidths(session: session)) } .scrollPosition($scrollPosition) .scrollIndicators(.hidden)
+			} .tableLines(lines: displayedStudents.count, rows: session.studentTableRowCount+1, fixedRowWidths: fixedRowWidths(session: session)) } .scrollPosition($scrollPosition) .scrollIndicators(.hidden)
 			
 			//Keyboard shortcuts
 				.onKeyPress { press in
@@ -117,8 +120,13 @@ struct StudentTableView: View {
 			
 		}
 		
+		.onChange(of: searchString) {
+			displayedStudents = session.students.searchBy(searchString)
+		}
+		
 		.onAppear {
 			session.provideCellConditionHostsForStudentTableToErrorCollector()
+			displayedStudents = session.students.searchBy(searchString)
 		}
 		
 		.onChange(of: session.students.count) { _,_ in
@@ -147,6 +155,8 @@ struct StudentTableView: View {
 		
 		.onChange(of: session.id) {
 			session.provideCellConditionHostsForStudentTableToErrorCollector()
+			searchString = ""
+			displayedStudents = session.students.searchBy(searchString)
 		}
 	}
 }

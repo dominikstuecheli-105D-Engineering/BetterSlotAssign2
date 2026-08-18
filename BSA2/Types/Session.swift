@@ -11,7 +11,7 @@ import SwiftData
 
 
 
-@Model class Session {
+@Model final class Session {
 	
 	var name: String
 	var timestamp: Date
@@ -43,6 +43,25 @@ import SwiftData
 		v += choiceAmount
 		if allowForMandatoryPartners { v += 1 }
 		return v
+	}
+	
+	//Cache
+	@Transient private var studentsByName: [String:Student] = [:]
+	
+	fileprivate func tryToMakeEntryForStudentsByNameDict(for name: String) {
+		if let student = students.first(where: {$0.name == name}) { studentsByName[name] = student }
+	}
+	
+	func getStudentByName(_ name: String) -> Student? {
+		foundProcess: if let found = studentsByName[name] {
+			if found.name != name {
+				studentsByName[name] = nil
+				break foundProcess
+			} else {return found}
+		}
+		
+		tryToMakeEntryForStudentsByNameDict(for: name)
+		return studentsByName[name]
 	}
 	
 	//Initialiser

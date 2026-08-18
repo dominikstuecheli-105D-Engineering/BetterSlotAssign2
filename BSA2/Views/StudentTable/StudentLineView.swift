@@ -13,6 +13,7 @@ import SwiftUI
 struct StudentLineView: View {
 	
 	@Bindable var student: Student
+	
 	@Environment(Session.self) var session: Session
 	
     var body: some View {
@@ -20,20 +21,24 @@ struct StudentLineView: View {
 			LineDragAndDropHandle()
 			
 			ConditionalTextCell($student.name, cellIndex: CellIndex(item: student, row: 1))
+				.markWhenSearchTokenMatched(student, matchingToken: .name)
 			
 			if session.useGenderField {
 				ConditionalTextCell($student.gender, cellIndex: CellIndex(item: student, row: 2))
 					.frame(maxWidth: smallCellFixedSize)
+					.markWhenSearchTokenMatched(student, matchingToken: .gender)
 			}
 			
 			if session.useGroupField {
 				ConditionalTextCell($student.group, cellIndex: CellIndex(item: student, row: 3))
 					.frame(maxWidth: smallCellFixedSize)
+					.markWhenSearchTokenMatched(student, matchingToken: .group)
 			}
 			
 			if session.useProfileField {
 				ConditionalTextCell($student.profile, cellIndex: CellIndex(item: student, row: 4))
 					.frame(maxWidth: smallCellFixedSize)
+					.markWhenSearchTokenMatched(student, matchingToken: .profile)
 			}
 			
 			ForEach(1...session.choiceAmount, id: \.self) { i in
@@ -42,6 +47,7 @@ struct StudentLineView: View {
 			
 			if session.allowForMandatoryPartners {
 				ConditionalTextCellWithSuggestionAcceptIndicator($student.mandatoryPartner, cellIndex: CellIndex(item: student, row: session.studentTableRowCount))
+					.markWhenSearchTokenMatched(student, matchingToken: .mandatoryPartner)
 			}
 		}
 		.fixedSize(horizontal: false, vertical: true)

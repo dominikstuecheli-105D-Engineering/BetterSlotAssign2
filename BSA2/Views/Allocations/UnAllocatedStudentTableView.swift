@@ -14,6 +14,9 @@ struct UnAllocatedStudentTableView: View {
 	
 	@Environment(Allocation.self) var allocation: Allocation
 	
+	@Binding var searchString: String
+	@State var displayedStudents: [AllocatedStudent] = []
+	
 	var body: some View {
 		VStack(spacing: 0) {
 			
@@ -24,7 +27,7 @@ struct UnAllocatedStudentTableView: View {
 		
 			VDivider()
 			
-			ForEach(allocation.unAllocatedStudents.indexSorted(), id: \.id) { student in
+			ForEach(displayedStudents.indexSorted(), id: \.id) { student in
 				AllocatedStudentLineView(student: student, draggableOriginIndex: 0)
 				
 				VDivider()
@@ -37,6 +40,14 @@ struct UnAllocatedStudentTableView: View {
 						allocation.moveStudentFromTransferable(to: 0, at: 1)
 					}
 			}
+		}
+		
+		.onChange(of: searchString) {
+			displayedStudents = allocation.unAllocatedStudents.searchBy(searchString)
+		}
+		
+		.onAppear {
+			displayedStudents = allocation.unAllocatedStudents.searchBy(searchString)
 		}
 	}
 }

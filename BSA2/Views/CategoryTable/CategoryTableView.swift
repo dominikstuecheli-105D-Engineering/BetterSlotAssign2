@@ -15,6 +15,9 @@ struct CategoryTableView: View {
 	@Environment(Session.self) var session: Session
 	@Binding var scrollPosition: ScrollPosition
 	
+	@Binding var searchString: String
+	@State var displayedCategories: [Category] = []
+	
 	@Environment(\.modelContext) var modelContext
 	
 	var body: some View {
@@ -33,10 +36,10 @@ struct CategoryTableView: View {
 			VDivider()
 			
 			ScrollView { LazyVStack(spacing: 0) {
-				ForEach(session.categories.indexSorted(), id: \.id) { category in
+				ForEach(displayedCategories.indexSorted(), id: \.id) { category in
 					CategoryLineView(category: category)
 				}
-			} .tableLines(lines: session.categories.count, rows: 5, fixedRowWidths: [1:2*standartPadding]) } .scrollPosition($scrollPosition) .scrollIndicators(.hidden)
+			} .tableLines(lines: displayedCategories.count, rows: 5, fixedRowWidths: [1:2*standartPadding]) } .scrollPosition($scrollPosition) .scrollIndicators(.hidden)
 			
 			//Keyboard shortcuts
 				.onKeyPress { press in
@@ -81,8 +84,13 @@ struct CategoryTableView: View {
 			}
 		}
 		
+		.onChange(of: searchString) {
+			displayedCategories = session.categories.searchBy(searchString)
+		}
+		
 		.onAppear {
 			session.provideCellConditionHostsForCategoryTableToErrorCollector()
+			displayedCategories = session.categories.searchBy(searchString)
 		}
 		
 		.onChange(of: session.categories.count) {
@@ -91,6 +99,8 @@ struct CategoryTableView: View {
 		
 		.onChange(of: session.id) {
 			session.provideCellConditionHostsForCategoryTableToErrorCollector()
+			searchString = ""
+			displayedCategories = session.categories.searchBy(searchString)
 		}
 	}
 }

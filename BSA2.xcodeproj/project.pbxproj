@@ -7,26 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B40788232FE15E840091FC79 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B40788212FE15E500091FC79 /* Sparkle.framework */; };
-		B40788242FE15E840091FC79 /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B40788212FE15E500091FC79 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B44152B6300690B6002E3EF3 /* Lua in Frameworks */ = {isa = PBXBuildFile; productRef = B44152B5300690B6002E3EF3 /* Lua */; };
+		B44152B930069193002E3EF3 /* CodeEditor in Frameworks */ = {isa = PBXBuildFile; productRef = B44152B830069193002E3EF3 /* CodeEditor */; };
+		B4415301303475B5002E3EF3 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = B4415300303475B5002E3EF3 /* Sparkle */; };
+		B44153043034768B002E3EF3 /* Lua in Frameworks */ = {isa = PBXBuildFile; productRef = B44153033034768B002E3EF3 /* Lua */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		B419A4FE2FE15D1100D4DF0E /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				B40788242FE15E840091FC79 /* Sparkle.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		B40788212FE15E500091FC79 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = "<group>"; };
+		B44152FB302CFD8E002E3EF3 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B44DE14F2FCB004700CFD4E3 /* BSA2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BSA2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -35,14 +23,29 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				appcast.xml,
+				"BSA2 1.0.0.md",
 				"BSA2 1.0.0.zip",
+				"BSA2 1.0.1.md",
+				"BSA2 1.0.1.zip",
+				"BSA2 1.1.0.md",
+				"BSA2 1.1.0.zip",
+				"BSA2 2.0.0.md",
+				"BSA22-1.delta",
+				"BSA23-1.delta",
+				"BSA23-2.delta",
 			);
 			target = B44DE14E2FCB004700CFD4E3 /* BSA2 */;
 		};
 		B419A4152FDC057300D4DF0E /* Exceptions for "BSA2" folder in "BSA2" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				105DLogo.png,
+				105DLogoBright.png,
 				Info.plist,
+				"Types/HappynessFunctions/Built-in/concentrateHappyness.lua",
+				"Types/HappynessFunctions/Built-in/distributeHappyness.lua",
+				"Types/HappynessFunctions/Built-in/linear.lua",
+				"Types/HappynessFunctions/Built-in/list.csv",
 			);
 			target = B44DE14E2FCB004700CFD4E3 /* BSA2 */;
 		};
@@ -72,27 +75,22 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B40788232FE15E840091FC79 /* Sparkle.framework in Frameworks */,
+				B4415301303475B5002E3EF3 /* Sparkle in Frameworks */,
+				B44153043034768B002E3EF3 /* Lua in Frameworks */,
+				B44152B930069193002E3EF3 /* CodeEditor in Frameworks */,
+				B44152B6300690B6002E3EF3 /* Lua in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		B419A4122FDB36AA00D4DF0E /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				B40788212FE15E500091FC79 /* Sparkle.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 		B44DE1462FCB004700CFD4E3 = {
 			isa = PBXGroup;
 			children = (
+				B44152FB302CFD8E002E3EF3 /* README.md */,
 				B419A3452FDB1E1200D4DF0E /* Release */,
 				B44DE1512FCB004700CFD4E3 /* BSA2 */,
-				B419A4122FDB36AA00D4DF0E /* Frameworks */,
 				B44DE1502FCB004700CFD4E3 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -115,7 +113,6 @@
 				B44DE14B2FCB004700CFD4E3 /* Sources */,
 				B44DE14C2FCB004700CFD4E3 /* Frameworks */,
 				B44DE14D2FCB004700CFD4E3 /* Resources */,
-				B419A4FE2FE15D1100D4DF0E /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -127,6 +124,10 @@
 			);
 			name = BSA2;
 			packageProductDependencies = (
+				B44152B5300690B6002E3EF3 /* Lua */,
+				B44152B830069193002E3EF3 /* CodeEditor */,
+				B4415300303475B5002E3EF3 /* Sparkle */,
+				B44153033034768B002E3EF3 /* Lua */,
 			);
 			productName = BSA2;
 			productReference = B44DE14F2FCB004700CFD4E3 /* BSA2.app */;
@@ -157,6 +158,9 @@
 			mainGroup = B44DE1462FCB004700CFD4E3;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				B44152B730069193002E3EF3 /* XCRemoteSwiftPackageReference "CodeEditor" */,
+				B44152FF303475B5002E3EF3 /* XCRemoteSwiftPackageReference "Sparkle" */,
+				B44153023034768B002E3EF3 /* XCRemoteSwiftPackageReference "LuaSwift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B44DE1502FCB004700CFD4E3 /* Products */;
@@ -317,7 +321,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = LR64Y52ZGB;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -346,7 +350,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 2.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "-105D-Engineering.BSA2";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -368,7 +372,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = LR64Y52ZGB;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -397,7 +401,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 2.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "-105D-Engineering.BSA2";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -432,6 +436,55 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B44152B730069193002E3EF3 /* XCRemoteSwiftPackageReference "CodeEditor" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ZeeZide/CodeEditor.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.6;
+			};
+		};
+		B44152FF303475B5002E3EF3 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.9.6;
+			};
+		};
+		B44153023034768B002E3EF3 /* XCRemoteSwiftPackageReference "LuaSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tomsci/LuaSwift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B44152B5300690B6002E3EF3 /* Lua */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Lua;
+		};
+		B44152B830069193002E3EF3 /* CodeEditor */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B44152B730069193002E3EF3 /* XCRemoteSwiftPackageReference "CodeEditor" */;
+			productName = CodeEditor;
+		};
+		B4415300303475B5002E3EF3 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B44152FF303475B5002E3EF3 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+		B44153033034768B002E3EF3 /* Lua */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B44153023034768B002E3EF3 /* XCRemoteSwiftPackageReference "LuaSwift" */;
+			productName = Lua;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B44DE1472FCB004700CFD4E3 /* Project object */;
 }

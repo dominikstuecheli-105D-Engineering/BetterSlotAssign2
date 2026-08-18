@@ -1,0 +1,42 @@
+{
+  "originHash" : "ca3a3371eaa0ba010cc052860d9d1fe95a5424388a845df29ff9a0b31affa42b",
+  "pins" : [
+    {
+      "identity" : "codeeditor",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ZeeZide/CodeEditor.git",
+      "state" : {
+        "revision" : "f5c076b94f4ceb05abff88ba91d75a8d57143f0c",
+        "version" : "1.2.6"
+      }
+    },
+    {
+      "identity" : "highlightr",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/helje5/Highlightr",
+      "state" : {
+        "revision" : "bd0358056ff1f12ea83833a9fc1b3b5a396a9da0",
+        "version" : "3.0.2"
+      }
+    },
+    {
+      "identity" : "luaswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tomsci/LuaSwift",
+      "state" : {
+        "revision" : "f5b1cf666d02a10b357c2a19c79e6e91247a88f4",
+        "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "sparkle",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sparkle-project/Sparkle",
+      "state" : {
+        "revision" : "ac2def288cbff5cfc7df3ffef6abdf45b72bcb0a",
+        "version" : "2.9.6"
+      }
+    }
+  ],
+  "version" : 3
+}

@@ -117,6 +117,7 @@ extension Array where Element: PersistentArrayCompatible {
 	
 	//Sorting elements after index
 	func indexSorted() -> Array<Element> {return self.sorted(by: {$0.index < $1.index})}
+	func indexReverseSorted() -> Array<Element> {return self.sorted(by: {$0.index > $1.index})}
 	
 	//Adding all element to a modelContext
 	func addToModelContext(_ modelContext: ModelContext) {

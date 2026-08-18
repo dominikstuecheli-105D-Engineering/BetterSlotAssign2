@@ -14,6 +14,8 @@ struct AllocationView: View {
 	
 	@Bindable var allocation: Allocation
 	
+	@Binding var searchString: String
+	
 	private func fixedRowWidths(allocation: Allocation) -> [Int:CGFloat] {
 		var returnValue: [Int:CGFloat] = [1:2*standartPadding]
 		var rowIndex: Int = 3
@@ -61,10 +63,10 @@ struct AllocationView: View {
 			
 			ScrollView { VStack(spacing: standartPadding*4) {
 				ForEach(allocation.categories.indexSorted(), id: \.id) { category in
-					AllocatedCategoryView(category: category)
+					AllocatedCategoryView(category: category, searchString: $searchString)
 				}
 				
-				UnAllocatedStudentTableView()
+				UnAllocatedStudentTableView(searchString: $searchString)
 			} } .environment(allocation)
 		}
 	}

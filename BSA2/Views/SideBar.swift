@@ -39,7 +39,7 @@ struct SideBar<Content: View>: View {
 	
 	var side: LeftRight
 	@Binding var expanded: Bool
-	@State var width: CGFloat = 200
+	@State var width: CGFloat = 220
 	
     var body: some View {
 		HStack(spacing: 0) {

@@ -48,7 +48,7 @@ enum AllocationDocumentationEntryType: Int, Codable {
 
 
 
-@Model class AllocationDocumentationEntry: PersistentArrayCompatible {
+@Model final class AllocationDocumentationEntry: PersistentArrayCompatible {
 	
 	var type: AllocationDocumentationEntryType
 	var desc: String
@@ -57,6 +57,7 @@ enum AllocationDocumentationEntryType: Int, Codable {
 	var id = UUID()
 	
 	var stepCode: String
+	var appBuildNumber: Int = 3 ///Added after Build 3
 	var timestamp: TimeInterval
 	
 	init(_ stepCode: String, timestamp: TimeInterval, index: Int, _ type: AllocationDocumentationEntryType, _ desc: String) {
@@ -64,6 +65,7 @@ enum AllocationDocumentationEntryType: Int, Codable {
 		self.desc = desc
 		self.index = index
 		self.stepCode = stepCode
+		self.appBuildNumber = Bundle.main.buildNumber
 		self.timestamp = timestamp
 	}
 }
@@ -87,7 +89,7 @@ struct AllocationDocumentationEntryView: View {
 					.foregroundStyle(entry.type.color())
 				
 				VStack {
-					Text("\(entry.stepCode), \(entry.type.title())" + (entry.type != .manualAction ? ", bei \(String(format:"%.3f",entry.timestamp))s" : "")) .font(.footnote) .foregroundStyle(.gray.opacity(0.6)) .fontWeight(.bold) ///Only display the timestamp when it is not a manual action because only then does it mean something
+					Text("\(entry.stepCode) (in Build \(entry.appBuildNumber)), \(entry.type.title())" + (entry.type != .manualAction ? ", bei \(entry.timestamp.decimalPlaces(3)))s" : "")) .font(.footnote) .foregroundStyle(.gray.opacity(0.6)) .fontWeight(.bold) ///Only display the timestamp when it is not a manual action because only then does it mean something
 						.frame(maxWidth: .infinity, alignment: .leading)
 					Text(entry.desc)
 						.frame(maxWidth: .infinity, alignment: .leading)

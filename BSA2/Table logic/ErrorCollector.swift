@@ -155,12 +155,11 @@ struct ErrorCollectorItemView: View {
 
 
 //The ErrorCollector is a singleton that manages the states of all cells conditions, without the cells actually needing to be rendered by SwiftUI.
-@Observable class ErrorCollector {
+@Observable final class ErrorCollector {
 	
 	static var shared = ErrorCollector() //Singleton
 	
 	var cellConditionHosts: [CellIndex:any CellConditionHost] = [:] ///The objects which can check the validity of an input in a cell
-	//var errors: [CellIndex:ConditionReturn] = [:] ///The dictionary which the cell views read from
 	
 	private var updateWorkItem: DispatchWorkItem?
 	
@@ -240,7 +239,7 @@ protocol CellConditionHost: Observable {
 
 
 
-@Observable class TextCellConditionHost: CellConditionHost {
+@Observable final class TextCellConditionHost: CellConditionHost {
 	
 	internal var getValueFunction: () -> String
 	internal var updateFunction: (String) -> ConditionReturn
@@ -262,7 +261,7 @@ protocol CellConditionHost: Observable {
 
 
 
-@Observable class IntegerCellConditionHost: CellConditionHost {
+@Observable final class IntegerCellConditionHost: CellConditionHost {
 	
 	internal var getValueFunction: () -> Int?
 	internal var updateFunction: (Int) -> ConditionReturn

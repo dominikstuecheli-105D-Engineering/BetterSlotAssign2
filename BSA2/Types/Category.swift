@@ -11,7 +11,7 @@ import SwiftData
 
 
 
-@Model class Category: PersistentArrayCompatible, CSVCodable {
+@Model final class Category: PersistentArrayCompatible, CSVCodable, SearchTokenProvider {
 	
 	var name: String
 	var number: Int?
@@ -65,6 +65,15 @@ import SwiftData
 		
 		self.index = index
 	}
+	
+	//Search tokens
+	@Transient var searchTokens: [SearchToken<RowConfigurator>] {
+		return [
+			.init(name, identifier: .name),
+		]
+	}
+	
+	@Transient var matchingTokensOnLastSearch: Set<TokenIdentifier> = []
 	
 	//Function to export to string array
 	func makeStringArray(configuration: [Int:RowConfigurator]) -> [String] {

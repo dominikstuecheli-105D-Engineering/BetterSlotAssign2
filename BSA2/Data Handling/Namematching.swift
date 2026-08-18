@@ -10,46 +10,6 @@ import Foundation
 
 
 
-fileprivate let germanLowercaseAccentsMap: [Character:String] = ["ä": "ae", "ö": "oe", "ü": "ue", "ß": "ss"]
-
-
-
-extension String {
-	///Formats a name to the format: "firstname maybemiddlename surname" (no capital, no special characters) to make name matching easier and more precise
-	func nameFormat() -> String {
-		var newName = ""
-		
-		var characterIndexCounter: Int = 0
-		var spaceCounter: Int = 0
-		
-		for character in self {
-			characterIndexCounter += 1
-			
-			//Lowercase
-			var revisedCharacter = String(character.lowercased())
-			
-			//Replace accents with non-german letters
-			if let accentReplacement = germanLowercaseAccentsMap[character] { revisedCharacter = accentReplacement }
-			
-			//Spaces
-			if character == " " {
-				spaceCounter += 1
-				if spaceCounter > 1 {revisedCharacter = ""} ///Replace multiple spaces with only one
-				if characterIndexCounter == 1 || characterIndexCounter == self.count { revisedCharacter = "" } ///If the space is the first or last character, disregard
-			} else { spaceCounter = 0 }
-			
-			//Remove diacratic stuff like ê -> e
-			revisedCharacter = revisedCharacter.folding(options: .diacriticInsensitive, locale: nil)
-			
-			newName.append(revisedCharacter)
-		}
-		
-		return newName
-	}
-}
-
-
-
 ///String similarity between 0 and 1
 func stringSimilarity(_ string1: String, _ string2: String, minimumSimilarity: Float = 0) -> Float {
 	guard string1 != string2 else { return 1 }
@@ -126,6 +86,7 @@ func stringSimilarityDisregardingWordOrder(_ string1: String, _ string2: String,
 }
 
 
+
 //Cache objects
 ///Name pair after which similarities can be indexed
 fileprivate struct NamePair: Hashable {
@@ -142,8 +103,10 @@ fileprivate struct NamePair: Hashable {
 	}
 }
 
+
+
 ///Actual cache object that handles the data
-class NameSimilarityCache {
+final class NameSimilarityCache {
 	private static var nameSimilarities: [NamePair:Float] = [:]
 	
 	static func getExistingSimilarity(_ name1: String, _ name2: String) -> Float? {
@@ -156,17 +119,17 @@ class NameSimilarityCache {
 		nameSimilarities[NamePair(name1, name2)] = similarity
 	}
 	
-	///Scheduling logic so that a clean only happens once, even when called multiple times
+	///Scheduling logic so that a clean only happens once per cell update, even when called multiple times from different cell updates
 	private static var cleaningWorkItem: DispatchWorkItem?
 	static func scheduleClean(for session: Session) {
 		self.cleaningWorkItem?.cancel()
-		self.cleaningWorkItem = DispatchWorkItem {clean(for: session)}
+		self.cleaningWorkItem = cleaningWork(for: session)
 		DispatchQueue.main.asyncAfter(deadline: .now()+0.2, execute: cleaningWorkItem!)
 	}
 	
 	///Cleans the cache from all name pairs that are not relevant anymore because one of the names does not exist anymore
-	private static func clean(for session: Session) {
-		Task {
+	private static func cleaningWork(for session: Session) -> DispatchWorkItem {
+		return DispatchWorkItem {
 			let initialNamePairCount = nameSimilarities.count
 			let startTime: Date = .now
 			
@@ -174,7 +137,7 @@ class NameSimilarityCache {
 			
 			for student in session.students {
 				relevantNames.insert(student.formattedName)
-				relevantNames.insert(student.mandatoryPartner.nameFormat())
+				relevantNames.insert(student.mandatoryPartner.simplify())
 			}
 			
 			for namePair in nameSimilarities {
@@ -195,10 +158,10 @@ class NameSimilarityCache {
 
 
 extension Student {
-	///A function that tries to match the blatantly misspelled names of chosen mandatory partner cells
+	///A function that tries to match the blatantly misspelled names of mandatory partner text cells
 	func findMisspelledPartner(in session: Session, minimumCertainty: Float = 0) -> (partner: Student?, certainty: Float) {
 		
-		let formattedSearchedName = mandatoryPartner.nameFormat()
+		let formattedSearchedName = mandatoryPartner.simplify()
 		let cache = NameSimilarityCache.self
 		
 		var bestMatch: Student?

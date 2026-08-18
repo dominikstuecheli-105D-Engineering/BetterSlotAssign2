@@ -38,36 +38,13 @@ extension Allocation {
 	}
 	
 	//Happyness score
-	///For a student in a specific category
-	func happynessScore(inChoice n: Int) -> Double {
-		return happynessFunction(n: choiceAmount)(n)
-	}
-	
-	fileprivate func happynessFunction(n: Int) -> ((Int) -> Double) {
-		switch happynessFunction {
-		case .exponentialDivideSuffering:
-			return {k in return -pow(Double(k-1) / Double(n-1), 2) + 1}
-		case .linear:
-			return {k in return -Double(k-1) / Double(n-1) + 1}
-		case .exponentialConcentrateSuffering:
-			return {k in return pow(Double(k-n) / Double(n-1), 2)}
-		}
-	}
-	
 	///For the whole allocation, **returns a total and not an avarage value!!!**
 	fileprivate func totalHappynessScore(of categoryArr: [[AllocatedStudentDummy]]) -> Double {
 		var totalScore: Double = 0
 		
 		for category in categoryArr.enumerated() {
-			let categoryIndex = category.offset
-			
 			for student in category.element.enumerated() {
-				for choice in student.element.categoryFromChoice {
-					if choice.value == categoryIndex {
-						totalScore += happynessScore(inChoice: choice.key)
-						break
-					}
-				}
+				totalScore += student.element.happynessScores[student.element.choiceFromCategory[category.offset]!]
 			}
 		}; return totalScore
 	}
@@ -97,19 +74,18 @@ nonisolated func nicePrint(_ string: String, do execute: Bool = true, level: Int
 //MARK: HELPER OBJECTS
 
 //Helper object to transmit progress data to a view
-@MainActor @Observable class AsyncProgress {
+@MainActor @Observable final class AsyncProgress {
 	var currentStep: String = ""
 }
 
 //Helper object to easier give information to functions
 ///It may seem stupid at first but always giving these three variables in each function call makes it a lot worse trust me
-private nonisolated class ShuffleInformation {
+private nonisolated final class ShuffleInformation {
 	let choiceAmount: Int
 	let capacities: [Int]
 	let minMembers: [Int]
 	let maxSearchDepth: Int
 	var debugMode: Bool
-	var happynessFunction: [Double] ///Key: choice index, value: happyness value
 	
 	//Time management
 	let startTime: Date
@@ -124,18 +100,12 @@ private nonisolated class ShuffleInformation {
 		}
 	}
 	
-	init(choiceAmount: Int, capacities: [Int], minMembers: [Int], maxSearchDepth: Int, startTime: Date, maxTime: TimeInterval, allowDymanicTime: Bool, debugMode: Bool, happynessFunction: @escaping (Int) -> Double) {
+	init(choiceAmount: Int, capacities: [Int], minMembers: [Int], maxSearchDepth: Int, startTime: Date, maxTime: TimeInterval, allowDymanicTime: Bool, debugMode: Bool) {
 		self.choiceAmount = choiceAmount
 		self.capacities = capacities
 		self.minMembers = minMembers
 		self.maxSearchDepth = maxSearchDepth
 		self.debugMode = debugMode
-		
-		var happynessFunctionCache: [Double] = [0]
-		for n in 1...choiceAmount {
-			happynessFunctionCache.append(happynessFunction(n))
-		}
-		self.happynessFunction = happynessFunctionCache
 		
 		self.startTime = startTime
 		self.maxTime = maxTime
@@ -147,7 +117,6 @@ private nonisolated class ShuffleInformation {
 		self.capacities = existing.capacities
 		self.minMembers = existing.minMembers
 		self.debugMode = existing.debugMode
-		self.happynessFunction = existing.happynessFunction
 		
 		self.startTime = existing.startTime
 		self.maxTime = existing.maxTime
@@ -180,22 +149,22 @@ private actor MultiResultTracker {
 
 
 //Dummy struct that can be used in multithreading
-class AllocatedStudentDummy: Equatable {
+final class AllocatedStudentDummy: Equatable {
 	let name: String
 	let id: UUID
 	var mandatoryPartner: AllocatedStudentDummy?
 	
 	let categoryFromChoice: [Int:Int] //Dictionary where the key is the choice index and the value is the category index
 	let choiceFromCategory: [Int:Int] //Dictionary where the key is the category index and the value is the choice index
+	let happynessScores: [Double] //Key is inChoice
 	
 	var gender: String
 	var group: String
 	var profile: String
 	
-	init(from student: Student, partner: AllocatedStudentDummy?, choiceAmount: Int) {
+	init(from student: Student, happynessFunction: HappynessFunction, choiceAmount: Int) throws {
 		self.name = student.name
 		self.id = student.id
-		//self.mandatoryPartner = partner
 		
 		self.gender = student.gender
 		self.group = student.group
@@ -213,6 +182,16 @@ class AllocatedStudentDummy: Equatable {
 		
 		self.categoryFromChoice = categoryFromChoice
 		self.choiceFromCategory = choiceFromCategory
+		
+		var happynessScores: [Double] = [0]
+		
+		try happynessFunction.openLuaState()
+		for i in 1...choiceAmount {
+			try happynessScores.append(happynessFunction.execute(student: student, inChoice: i, choiceAmount: choiceAmount, openLuaState: false, closeLuaState: false))
+		}
+		happynessFunction.closeLuaState()
+		
+		self.happynessScores = happynessScores
 	}
 	
 	static func == (lhs: AllocatedStudentDummy, rhs: AllocatedStudentDummy) -> Bool {
@@ -233,25 +212,25 @@ extension Array where Element == [AllocatedStudentDummy] {
 		if let partner = await student.mandatoryPartner {
 			//Check if there is enough capacity before moving, then move (with partner)
 			if self[newCategory].count <= info.capacities[newCategory]-2 && self[oldCategory].count >= info.minMembers[oldCategory]+2 {
-				let oldScore = info.happynessFunction[student.choiceFromCategory[oldCategory]!]*2 //*2 because of the identical partner
+				let oldScore = student.happynessScores[student.choiceFromCategory[oldCategory]!]*2 //*2 because of the identical partner
 				
 				self[newCategory].append(student)
 				self[oldCategory].removeAll(where: {$0.id == student.id})
 				self[newCategory].append(partner)
 				self[oldCategory].removeAll(where: {$0.id == partner.id})
 				
-				let newScore = info.happynessFunction[student.choiceFromCategory[newCategory]!]*2
+				let newScore = student.happynessScores[student.choiceFromCategory[newCategory]!]*2
 				return (true, newScore-oldScore) //Moved student and partner
 			}
 		} else {
 			//Check if there is enough capacity before moving, then move
 			if self[newCategory].count <= info.capacities[newCategory]-1 && self[oldCategory].count >= info.minMembers[oldCategory]+1 {
-				let oldScore = info.happynessFunction[student.choiceFromCategory[oldCategory]!]
+				let oldScore = student.happynessScores[student.choiceFromCategory[oldCategory]!]
 				
 				self[newCategory].append(student)
 				self[oldCategory].removeAll(where: {$0.id == student.id})
 				
-				let newScore = info.happynessFunction[student.choiceFromCategory[newCategory]!]
+				let newScore = student.happynessScores[student.choiceFromCategory[newCategory]!]
 				return (true, newScore-oldScore) //Moved student
 			}
 		}; return (false, 0) //Couldnt move
@@ -449,7 +428,7 @@ extension Array where Element == [AllocatedStudentDummy] {
 //MARK: MAIN GENERATE FUNCTION
 
 extension Allocation {
-	func generate(from session: Session, into modelContext: ModelContext, progress: AsyncProgress) async {
+	func generate(from session: Session, into modelContext: ModelContext, with happynessFunction: HappynessFunction, progress: AsyncProgress) async {
 		
 		//Time management
 		let startTime: Date = .now
@@ -467,7 +446,7 @@ extension Allocation {
 			}
 		}
 		func documentTimeExceed(at stepCode: String) {
-			document(stepCode, timeSinceStart(), .exitError, into: modelContext, "Maximale Laufzeit überschritten (\(timeSinceStart().rounded())s): Zuteilung wahrscheinlich nicht möglich. Versuchen sie die Kapazitäten zu erhöhen oder geben sie den Schüler*innen allenfalls mehr Wahlmöglichkeiten.")
+			document(stepCode, timeSinceStart(), .exitError, into: modelContext, "Maximale Laufzeit ohne Anzeichen einer unmöglichen Zuteilung überschritten (\(timeSinceStart().rounded())s). Versuchen sie die Kapazitäten zu erhöhen oder geben sie den Schüler*innen allenfalls mehr Wahlmöglichkeiten.")
 		}
 		
 		//Starting
@@ -478,29 +457,26 @@ extension Allocation {
 		var capacities: [Int] = []
 		var minMembers: [Int] = []
 		
-		//1. Copying existing data
+		//MARK: Copying data
+		
 		mainCategoryArr.insert([], at: 0) //At index 0 are the unallocated students
 		capacities.insert(0, at: 0)
 		minMembers.insert(0, at: 0)
 		
 		///Small helper function to generate the helper object for all the helper functions
 		func infoObject() -> ShuffleInformation {
-			let H = happynessFunction(n: choiceAmount)
-			let info = ShuffleInformation(choiceAmount: choiceAmount, capacities: capacities, minMembers: minMembers, maxSearchDepth: maxSearchDepth, startTime: startTime, maxTime: maxTime, allowDymanicTime: allowDymanicTime, debugMode: debugMode, happynessFunction: {k in return H(k)})
-			return info
+			ShuffleInformation(choiceAmount: choiceAmount, capacities: capacities, minMembers: minMembers, maxSearchDepth: maxSearchDepth, startTime: startTime, maxTime: maxTime, allowDymanicTime: allowDymanicTime, debugMode: debugMode)
 		}
 		
-		//MARK: Safety checks
-		
-		///**1.1** Copying categories
+		//Copying categories
 		var categoryIndexCounter = 1
 		
 		for category in session.categories.indexSorted() {
 			if let newInstance = AllocatedCategory(from: category) {
 				
-				///1.1.1 Not following to the last category with number n+1
+				///Not following to the last category with number n+1
 				if newInstance.index != categoryIndexCounter {
-					document("1.1.1", timeSinceStart(), .exitError, into: modelContext, "Die Nummer von \"\(category.name)\" folgt nicht um +1 der davor. Die Nummern der Kategorien müssen einer anderen um jeweils +1 folgen.")
+					document("Copying data/Copying categories", timeSinceStart(), .exitError, into: modelContext, "Die Nummer von \"\(category.name)\" folgt nicht um +1 der davor. Die Nummern der Kategorien müssen einer anderen aus technischen Gründen (Integer as Array Index) um jeweils +1 folgen.")
 					return
 				} else {
 					categoryIndexCounter += 1
@@ -517,22 +493,22 @@ extension Allocation {
 					minMembers.insert(0, at: newInstance.index) //If underfilled categories should be deleted, just set 0 so that students are allowed to be moved out of these categories
 				}
 			} else {
-				///1.1.2 No number given
+				///No number given
 				if category.number == nil {
-					document("1.1.2", timeSinceStart(), .exitError, into: modelContext, "\"\(category.name)\" konnte nicht übernommen werden: keine Nummer gegeben")
+					document("Copying data/Copying categories", timeSinceStart(), .exitError, into: modelContext, "\"\(category.name)\" konnte nicht übernommen werden: keine Nummer gegeben")
 				}
-				///1.1.3 No Capacity given
+				///No Capacity given
 				if category.capacity == nil {
-					document("1.1.3", timeSinceStart(), .exitError, into: modelContext, "\"\(category.name)\" konnte nicht übernommen werden: keine Kapazität gegeben")
+					document("Copying data/Copying categories", timeSinceStart(), .exitError, into: modelContext, "\"\(category.name)\" konnte nicht übernommen werden: keine Kapazität gegeben")
 				}
-				///1.1.4 No min. Member count given
+				///No min. Member count given
 				if category.minParticipantRequirement == nil {
-					document("1.1.4", timeSinceStart(), .exitError, into: modelContext, "\"\(category.name)\" konnte nicht übernommen werden: keine Mindestanzahl für Teilnehmer gegeben")
+					document("Copying data/Copying categories", timeSinceStart(), .exitError, into: modelContext, "\"\(category.name)\" konnte nicht übernommen werden: keine Mindestanzahl für Teilnehmer gegeben")
 				}
 			}
 		}
 		
-		///**1.2** Copying students into mainCategoryArr[0]
+		//Copying students (into mainCategoryArr[0])
 		var studentDummyByName: [String:AllocatedStudentDummy] = [:]
 		var studentsWithValidPartners: [Student] = []
 		
@@ -540,41 +516,46 @@ extension Allocation {
 			var invalid = false
 			var invalidPartner = false
 			
-			///**1.2.1** Choice validity
+			//Choice validity
 			for choice in student.choices {
-				///**1.2.1.1** Is a choice given?
+				/// Is a choice given?
 				if choice.value == nil && choice.key <= choiceAmount {
-					document("1.2.1.1", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) Hat als \(choice.key). Wahl nichts angegeben und wird ab jetzt nicht mehr berücksichtigt.")
+					document("Copying data/Copying students", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) Hat als \(choice.key). Wahl nichts angegeben und wird ab jetzt nicht mehr berücksichtigt.")
 					invalid = true
-				///**1.2.1.2** Is it a valid choice?
+				///Is it a valid choice?
 				}else if !categories.contains(where: {$0.index == choice.value}) && choice.key <= choiceAmount {
-					document("1.2.1.2", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) Hat als \(choice.key). Wahl eine Kategorie angegeben, die es nicht gibt und wird ab jetzt nicht mehr berücksichtigt.")
+					document("Copying data/Copying students", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) Hat als \(choice.key). Wahl eine Kategorie angegeben, die es nicht gibt und wird ab jetzt nicht mehr berücksichtigt.")
 					invalid = true
 				}
 			}
 			
-			///**1.2.2** Is the given mandatory partner valid?
+			//Is the given mandatory partner valid?
 			if allowForMandatoryPartners && student.mandatoryPartner != "" && !invalid {
 				if let partner = session.students.first(where: {$0.name == student.mandatoryPartner}) {
 					if partner.choices.truncated(toLength: choiceAmount) != student.choices.truncated(toLength: choiceAmount) { ///The .truncated() function sorts (SwiftData sometimes shuffles the key-value pairs in the array) and shortens the dictionary to only the used choices so that this check does not return true even tho they are "identical"
-						///**1.2.2.1** Not the same choices
-						document("1.2.2.1", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) und \(partner.name) haben nicht identisch gewählt und werden nicht als Partner*innen berücksichtigt.")
+						///Not the same choices
+						document("Copying data/Copying students", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) und \(partner.name) haben nicht identisch gewählt und werden nicht als Partner*innen berücksichtigt.")
 						invalidPartner = true
 					} else if partner.mandatoryPartner != student.name {
-						///**1.2.2.2** Not chosen as partner in both directions
-						document("1.2.2.2", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) und \(partner.name) haben sich nicht gegenseitig als Partner*innen gewählt und werden deshalb nicht als solche berücksichtigt.")
+						///Not chosen as partner in both directions
+						document("Copying data/Copying students", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) und \(partner.name) haben sich nicht gegenseitig als Partner*innen gewählt und werden deshalb nicht als solche berücksichtigt.")
 						invalidPartner = true
 					}
 				} else {
-					///**1.2.2.3** Partner not found
-					document("1.2.2.3", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) Hat als zwingender Partner eine Person*innen angegeben, die nicht gefunden wurde.")
+					///Partner not found
+					document("Copying data/Copying students", timeSinceStart(), .destructiveAction, into: modelContext, "\(student.name) Hat als zwingender Partner eine Person*innen angegeben, die nicht gefunden wurde.")
 					invalidPartner = true
 				}
 			}
 			
-			///**1.3** Create AllocatedStudentDummy instance and insert
+			///Create AllocatedStudentDummy instance and insert
 			if !invalid {
-				let newInstance = AllocatedStudentDummy(from: student, partner: nil, choiceAmount: choiceAmount)
+				let newInstance: AllocatedStudentDummy
+				do {
+					newInstance = try AllocatedStudentDummy(from: student, happynessFunction: happynessFunction, choiceAmount: choiceAmount)
+				} catch {
+					document("Copying data/Copying students", timeSinceStart(), .exitError, into: modelContext, "Error mit der Glücklichkeitsfunktion (LUA Error): \(error.localizedDescription)"); return
+				}
 				mainCategoryArr[0].append(newInstance)
 				studentDummyByName[newInstance.name] = newInstance
 				
@@ -587,12 +568,12 @@ extension Allocation {
 			}
 		}
 		
-		///**1.4** Linking partners
+		//Linking partners
 		for student in studentsWithValidPartners {
 			studentDummyByName[student.name]?.mandatoryPartner = studentDummyByName[student.mandatoryPartner]
 		}
 		
-		///**1.5** Checking if there is enough capacity in total
+		//Checking if there is enough capacity in total
 		var totalCapacity: Int = 0
 		for category in categories {
 			totalCapacity += category.capacity
@@ -602,7 +583,7 @@ extension Allocation {
 			return
 		}
 		
-		//2. Assigning everyone to first choice
+		//Assigning everyone to first choice
 		let unassigned = mainCategoryArr[0]
 		mainCategoryArr[0] = []
 		for student in unassigned {
@@ -611,7 +592,7 @@ extension Allocation {
 		}
 		
 		//MARK: Core loops
-		//3. Juggling students around
+		//Juggling students around
 		nicePrint("arrived at core loops at \(timeSinceStart())", level: 0)
 		
 		///I'm sorry for the indentation you're about to witness **(^-^)
@@ -621,7 +602,7 @@ extension Allocation {
 		while !overshootFinished || !undershootFinished { //Main loop
 			progress.currentStep = "Zuteilung generieren"
 			
-			///**3.1** Handling overshoot (More students than capacity)
+			//Handling overshoot (More students than capacity)
 			while !overshootFinished { overshootFinished = true; for categoryIndex in 1...mainCategoryArr.count-1 { //Overshoot loop
 				let category = mainCategoryArr[categoryIndex]
 				let capacity = capacities[categoryIndex]
@@ -629,49 +610,47 @@ extension Allocation {
 				if category.count > capacity {
 					overshootFinished = false
 					if await !mainCategoryArr.forcefullyFreeUpSlot(at: categoryIndex, info: infoObject()).possible {
-						document("3.1", timeSinceStart(), .error, into: modelContext, "Kategorie \(categoryIndex) Hat zu viele Teilnehmer (\(category.count)/\(capacity)) von denen niemand bewegt werden kann.")
+						document("Core loops/Handling overshoot", timeSinceStart(), .error, into: modelContext, "Kategorie \(categoryIndex) Hat zu viele Teilnehmer (\(category.count)/\(capacity)) von denen niemand bewegt werden kann.")
 					}
 				}
 				
 				//Safeguard for impossible allocations
-				if maxTimeExceeded() {overshootFinished = true; undershootFinished = true; documentTimeExceed(at: "3.1"); return}
+				if maxTimeExceeded() {overshootFinished = true; undershootFinished = true; documentTimeExceed(at: "Core loops/Handling overshoot"); return}
 				
 			} } //END < for categoryIndex in 1...mainCategoryArr.count-1 > //END Overshoot loop
 			
-			///**3.2** Handlung undershoot (Less students than required)
-			while !undershootFinished && overshootFinished { undershootFinished = true; for category in self.categories { //Undershoot loop
+			//Handling undershoot (Less students than required)
+			while !undershootFinished && overshootFinished { undershootFinished = true; for category in self.categories { ///Undershoot loop
 				if mainCategoryArr[category.index].count < category.minParticipants { switch studentBalancing {
 					
-					///**3.2.1**
 				case .deleteCategoriesWithNotEnoughMembers:
 					if capacities[category.index] != 0 {
 						capacities[category.index] = 0
-						document("3.2.1", timeSinceStart(), .error, into: modelContext, "\(category.name) hat nicht genügend Teilnehmer; Teilnehmer werden nun anders verteilt.")
+						document("Core loops/Handling undershoot", timeSinceStart(), .error, into: modelContext, "\(category.name) hat nicht genügend Teilnehmer; Teilnehmer werden nun anders verteilt.")
 						overshootFinished = false //So that the overshoot loop is triggered again
 					}
 					
-					///**3.2.2**
 				case .tryToFillCategoriesWithNotEnoughMembers:
 					undershootFinished = false
 					if await !mainCategoryArr.forcefullyFillSlot(at: category.index, info: infoObject()).possible {
-						document("3.2.2", timeSinceStart(), .error, into: modelContext, "\(category.name) hat nicht genügend Teilnehmer und lässt sich mit niemandem füllen.")
+						document("Core loops/Handling undershoot", timeSinceStart(), .error, into: modelContext, "\(category.name) hat nicht genügend Teilnehmer und lässt sich mit niemandem füllen.")
 					}
 					overshootFinished = false //So that the overshoot loop is triggered again
 				} }
 				
 				//Safeguard for impossible allocations
-				if maxTimeExceeded() {overshootFinished = true; undershootFinished = true; documentTimeExceed(at: "3.2"); return}
+				if maxTimeExceeded() {overshootFinished = true; undershootFinished = true; documentTimeExceed(at: "Core loops/Handlung undershoot"); return}
 				
 			} } //END < for category in categories > //END Undershoot loop
 			
-			///**3.3** Checking for possible improvements
+			//Checking for possible improvements
 			progress.currentStep = "Fertige Zuteilung überprüfen"
 			if await mainCategoryArr.checkForImprovements(info: infoObject()).possible {
 				overshootFinished = false; undershootFinished = false
 			}
 			
 			//Safeguard for impossible allocations
-			if maxTimeExceeded() {overshootFinished = true; undershootFinished = true; documentTimeExceed(at: "3.3"); return}
+			if maxTimeExceeded() {overshootFinished = true; undershootFinished = true; documentTimeExceed(at: "Core loops"); return}
 			
 		} //END Main loop
 		
@@ -680,7 +659,7 @@ extension Allocation {
 		progress.currentStep = "Fertige Daten übertragen"
 		nicePrint("exited core loops at \(timeSinceStart())", level: 0)
 		
-		//4. Append all students from the mainCategoryArr to the actual category classes and other finishing touches
+		//Append all students from the mainCategoryArr to the actual category classes and other finishing touches
 		let totalHappynessScore = totalHappynessScore(of: mainCategoryArr)
 		var studentCounter = 0
 		
@@ -694,8 +673,13 @@ extension Allocation {
 			}
 		}
 		
-		///Happyness score
+		//Happyness score
 		happynessScore = totalHappynessScore/Double(studentCounter)
+		
+		//Making the happynessFunction snapshot
+		let newHappynessFunctionSnapshot = HappynessFunctionSnapshot(happynessFunction)
+		modelContext.insert(newHappynessFunctionSnapshot)
+		happynessFunctionSnapshot = newHappynessFunctionSnapshot
 		
 		if documentation.last?.type != .exitError {
 			document("", timeSinceStart(), .stageSeperator, into: modelContext, "Automatische Zuteilung erfolgreich beendet")

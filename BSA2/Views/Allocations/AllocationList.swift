@@ -13,14 +13,26 @@ struct AllocationList: View {
 	@Environment(Session.self) var session: Session
 	@Binding var selectedAllocation: Allocation?
 	
+	@Binding var searchString: String
+	
+	@State var displayedAllocations: [Allocation] = []
+	
 	var body: some View {
 		ScrollView { LazyVStack(spacing: standartPadding) {
-			ForEach(session.allocations.indexSorted().reversed()) { allocation in
+			ForEach(displayedAllocations.indexReverseSorted()) { allocation in
 				AllocationItemListView(allocation, selectedAllocation: $selectedAllocation)
 					.onTapGesture {selectedAllocation = allocation}
 			}
 			
 			Spacer()
 		} .padding(standartPadding) }
+		
+		.onChange(of: searchString) {
+			displayedAllocations = session.allocations.searchBy(searchString)
+		}
+		
+		.onAppear {
+			displayedAllocations = session.allocations.searchBy(searchString)
+		}
 	}
 }

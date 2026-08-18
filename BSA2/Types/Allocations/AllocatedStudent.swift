@@ -11,7 +11,7 @@ import SwiftData
 
 
 
-@Model class AllocatedStudent: PersistentArrayCompatible, CSVEncodable {
+@Model final class AllocatedStudent: PersistentArrayCompatible, CSVEncodable, SearchTokenProvider {
 	
 	var name: String
 	
@@ -20,6 +20,7 @@ import SwiftData
 	var profile: String
 	
 	var choices: [Int:Int?]
+	var happynessScores: [Double] = [] //Key is inChoice, index 0 is just filled with a blank //Added in 2.0.0
 	var mandatoryPartnerName: String ///Only the name is stored as a string, not an actual object reference since it isnt really needed.
 	
 	var index: Int
@@ -43,6 +44,19 @@ import SwiftData
 		self.index = student.index
 	}
 	
+	//Search tokens
+	@Transient var searchTokens: [SearchToken<Student.RowConfigurator>] {
+		return [
+			.init(name, identifier: .name),
+			.init(gender, identifier: .gender),
+			.init(group, identifier: .group),
+			.init(profile, identifier: .profile),
+			.init(mandatoryPartnerName, identifier: .mandatoryPartner),
+		]
+	}
+	
+	@Transient var matchingTokensOnLastSearch: Set<TokenIdentifier> = []
+	
 	init(from student: AllocatedStudentDummy) {
 		self.name = student.name
 		self.choices = student.categoryFromChoice
@@ -51,6 +65,7 @@ import SwiftData
 		self.profile = student.profile
 		self.index = 1 ///Will be overwritten anyways because its added with .addAtEnd()
 		self.mandatoryPartnerName = student.mandatoryPartner?.name ?? ""
+		self.happynessScores = student.happynessScores
 	}
 	
 	func makeStringArray(configuration: [Int:Student.RowConfigurator]) -> [String] {

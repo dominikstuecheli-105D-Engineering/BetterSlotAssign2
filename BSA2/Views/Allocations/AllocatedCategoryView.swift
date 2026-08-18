@@ -15,6 +15,9 @@ struct AllocatedCategoryView: View {
 	@Bindable var category: AllocatedCategory
 	@Environment(Allocation.self) var allocation: Allocation
 	
+	@Binding var searchString: String
+	@State var displayedStudents: [AllocatedStudent] = []
+	
 	private func fixedRowWidths(allocation: Allocation) -> [Int:CGFloat] {
 		var returnValue: [Int:CGFloat] = [1:2*standartPadding]
 		var rowIndex: Int = 3
@@ -35,12 +38,12 @@ struct AllocatedCategoryView: View {
 			VDivider()
 			
 			VStack(spacing: 0) {
-				ForEach(category.students.indexSorted(), id: \.id) { student in
+				ForEach(displayedStudents.indexSorted(), id: \.id) { student in
 					AllocatedStudentLineView(student: student, draggableOriginIndex: category.index)
 				}
 			}
 			
-			.tableLines(lines: category.students.count, rows: allocation.studentTableRowCount, fixedRowWidths: fixedRowWidths(allocation: allocation))
+			.tableLines(lines: displayedStudents.count, rows: allocation.studentTableRowCount, fixedRowWidths: fixedRowWidths(allocation: allocation))
 			
 			VDivider()
 			
@@ -52,6 +55,14 @@ struct AllocatedCategoryView: View {
 					}
 			}
 			
+		}
+		
+		.onChange(of: searchString) {
+			displayedStudents = category.students.searchBy(searchString)
+		}
+		
+		.onAppear {
+			displayedStudents = category.students.searchBy(searchString)
 		}
 	}
 }

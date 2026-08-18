@@ -101,6 +101,35 @@ struct RoundedCornerTextField: View {
 
 
 
+struct RoundedCornerSearchField: View {
+	
+	@Binding var searchString: String
+	
+	var body: some View {
+		HStack(spacing: standartPadding) {
+			Image(systemName: "line.3.horizontal.decrease") .bold() .opacity(0.7)
+			
+			TextField("Suchen/Filtern", text: $searchString)
+				.textFieldStyle(.plain)
+		}
+		.padding(standartPadding)
+		.background {
+			ZStack {
+				if searchString != "" {
+					RoundedRectangle(cornerRadius: standartPadding) .foregroundStyle(.blue.opacity(0.5))
+				}
+				
+				RoundedRectangle(cornerRadius: standartPadding)
+					.stroke(lineWidth: 1.5)
+					.padding(0.75)
+					.foregroundStyle(searchString == "" ? .gray.opacity(0.3) : .blue)
+			}
+		}
+	}
+}
+
+
+
 struct RoundedCornerButton: View {
 	
 	var title: String?
@@ -203,7 +232,7 @@ struct RoundedCornerIntegerField: View {
 	}
 	
 	var body: some View {
-		TextField("", text: $localString)
+		TextField("Int", text: $localString)
 			.textFieldStyle(.plain)
 			.frame(width: 25)
 			.padding(standartPadding)

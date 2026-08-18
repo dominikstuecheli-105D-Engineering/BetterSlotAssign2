@@ -20,6 +20,7 @@ struct CategoryLineView: View {
 			LineDragAndDropHandle()
 			
 			ConditionalTextCell($category.name, cellIndex: CellIndex(item: category, row: 1))
+				.markWhenSearchTokenMatched(category, matchingToken: .name)
 			
 			ConditionalIntegerCell($category.number, cellIndex: CellIndex(item: category, row: 2))
 			

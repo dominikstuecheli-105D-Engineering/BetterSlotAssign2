@@ -11,7 +11,7 @@ import SwiftData
 
 
 
-@Model class Student: PersistentArrayCompatible, CSVCodable {
+@Model final class Student: PersistentArrayCompatible, CSVCodable, LUAObjectCodable, SearchTokenProvider {
 	
 	var name: String
 	
@@ -30,7 +30,7 @@ import SwiftData
 	@Transient fileprivate var localFormattedName: String = ""
 	@Transient var formattedName: String {
 		if nameThatHasBeenFormatted != name {
-			localFormattedName = name.nameFormat()
+			localFormattedName = name.simplify()
 			nameThatHasBeenFormatted = name
 		}
 		return localFormattedName
@@ -46,6 +46,19 @@ import SwiftData
 		self.mandatoryPartner = ""
 		self.index = index
 	}
+	
+	//Search tokens
+	@Transient var searchTokens: [SearchToken<RowConfigurator>] {
+		return [
+			.init(name, identifier: .name),
+			.init(gender, identifier: .gender),
+			.init(group, identifier: .group),
+			.init(profile, identifier: .profile),
+			.init(mandatoryPartner, identifier: .mandatoryPartner),
+		]
+	}
+	
+	@Transient var matchingTokensOnLastSearch: Set<TokenIdentifier> = []
 	
 	//Function to import from CSV formatted as string array
 	required init?(fromStringArray strings: [String], configuration: [Int:RowConfigurator], index: Int) {
@@ -95,6 +108,18 @@ import SwiftData
 			.mandatoryPartner: {return self.mandatoryPartner},
 			.choice: {choiceCounter += 1; return self.choices[choiceCounter].string()}
 		])
+	}
+	
+	//Exporting LUA tables to give to the LUA happyness function
+	func makeLUATable() -> LUATable {
+		return [
+			"name": name,
+			"gender": gender,
+			"group": group,
+			"profile": profile,
+			"choices": choices, ///Still a "dictionary", its just nested in the greater LUATable dictionary now
+			"mandatoryPartner": mandatoryPartner,
+		]
 	}
 	
 	enum RowConfigurator {

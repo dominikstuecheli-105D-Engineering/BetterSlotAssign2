@@ -11,7 +11,7 @@ import SwiftData
 
 
 
-@Model class PersistentSettings {
+@Model final class PersistentSettings {
 	
 	var lastOpenedSession: Session? = nil
 	var leftSidebarOpen: Bool = true
