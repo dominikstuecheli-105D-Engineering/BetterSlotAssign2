@@ -95,6 +95,7 @@ struct CategoryTableView: View {
 		
 		.onChange(of: session.categories.count) {
 			session.provideCellConditionHostsForCategoryTableToErrorCollector()
+			displayedCategories = session.categories.searchBy(searchString)
 		}
 		
 		.onChange(of: session.id) {

@@ -61,6 +61,10 @@ struct AllocatedCategoryView: View {
 			displayedStudents = category.students.searchBy(searchString)
 		}
 		
+		.onChange(of: category.students.count) {
+			displayedStudents = category.students.searchBy(searchString)
+		}
+		
 		.onAppear {
 			displayedStudents = category.students.searchBy(searchString)
 		}

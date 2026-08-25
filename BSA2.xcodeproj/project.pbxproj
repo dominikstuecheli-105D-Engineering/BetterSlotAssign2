@@ -30,9 +30,19 @@
 				"BSA2 1.1.0.md",
 				"BSA2 1.1.0.zip",
 				"BSA2 2.0.0.md",
-				"BSA22-1.delta",
+				"BSA2 2.0.0.zip",
+				"BSA2 2.0.1.md",
+				"BSA2 2.0.1.zip",
 				"BSA23-1.delta",
 				"BSA23-2.delta",
+				"BSA24-1.delta",
+				"BSA24-2.delta",
+				"BSA24-3.delta",
+				"BSA25-1.delta",
+				"BSA25-2.delta",
+				"BSA25-3.delta",
+				"BSA25-4.delta",
+				"old_updates/BSA22-1.delta",
 			);
 			target = B44DE14E2FCB004700CFD4E3 /* BSA2 */;
 		};
@@ -321,7 +331,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = LR64Y52ZGB;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -350,7 +360,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 2.0.0;
+				MARKETING_VERSION = 2.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "-105D-Engineering.BSA2";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -372,7 +382,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = LR64Y52ZGB;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -401,7 +411,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 2.0.0;
+				MARKETING_VERSION = 2.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "-105D-Engineering.BSA2";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;

@@ -205,7 +205,7 @@ struct ErrorCollectorItemView: View {
 	
 	static var setupProcessOngoing: Bool = false
 	
-	///The setup function wraps a closure that provides the cellConditionHosts in logic that prevents the closure from being called multiple times, because SwiftUI leads to this function possibly being called multiple times in one frame
+	///The setup function wraps a closure that provides the cellConditionHosts in logic that prevents the closure from being called multiple times, because SwiftUI leads to this function possibly being called multiple times to adjust to the same change
 	static func setup(_ setupFunction: @escaping () -> [CellIndex:any CellConditionHost]) {
 		guard !setupProcessOngoing else {return}
 		setupProcessOngoing = true

@@ -255,7 +255,6 @@ extension Allocation {
 			}
 		}
 		
-		print("counter: \(studentCounter), score: \(happynessScore)")
 		studentCounter += unAllocatedStudents.count
 		happynessScore = totalHappynessScore/Double(studentCounter)
 	}

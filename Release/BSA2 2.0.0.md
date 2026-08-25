@@ -1,5 +1,5 @@
 #	BSA2 2.0.0 (Build 4): Das LUA Scripting Update!
-###	Dominik Stücheli, XXXXX
+###	Dominik Stücheli, 18. August 2026
 ![](https://github.com/dominikstuecheli-105D-Engineering/BetterSlotAssign2/blob/main/BSA2/105DLogo.png?raw=true)
 **Hauptveränderung: LUA-Scripting**
 - Die Glücklichkeitsfunktionen sind nun nicht mehr fix in Swift gecodete Funktionen sondern in LUA geschriebene Funktionen, welche dann durch die eigebettete LUA C-API (LuaSwift von tomsci) bei Runtime compiled werden. **Dies bedeutet, dass der/die NutzerIn auch eigene Glücklichkeitsfunktionen schreiben kann.**

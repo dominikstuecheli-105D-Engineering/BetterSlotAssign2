@@ -46,6 +46,10 @@ struct UnAllocatedStudentTableView: View {
 			displayedStudents = allocation.unAllocatedStudents.searchBy(searchString)
 		}
 		
+		.onChange(of: allocation.unAllocatedStudents.count) {
+			displayedStudents = allocation.unAllocatedStudents.searchBy(searchString)
+		}
+		
 		.onAppear {
 			displayedStudents = allocation.unAllocatedStudents.searchBy(searchString)
 		}

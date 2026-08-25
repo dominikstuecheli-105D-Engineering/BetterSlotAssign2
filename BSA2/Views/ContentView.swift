@@ -86,6 +86,7 @@ struct ContentView: View {
 					}
 					
 					Image(colorScheme == .dark ? "105DLogo" : "105DLogoBright") .resizable() .scaledToFit()
+						.frame(maxWidth: 250)
 				} .padding(standartPadding)
 			} }
 			

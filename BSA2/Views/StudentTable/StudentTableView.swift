@@ -131,6 +131,7 @@ struct StudentTableView: View {
 		
 		.onChange(of: session.students.count) { _,_ in
 			session.provideCellConditionHostsForStudentTableToErrorCollector()
+			displayedStudents = session.students.searchBy(searchString)
 		}
 		
 		.onChange(of: session.choiceAmount) { _,_ in

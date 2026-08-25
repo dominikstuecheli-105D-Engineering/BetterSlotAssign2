@@ -31,6 +31,10 @@ struct AllocationList: View {
 			displayedAllocations = session.allocations.searchBy(searchString)
 		}
 		
+		.onChange(of: session.allocations.count) {
+			displayedAllocations = session.allocations.searchBy(searchString)
+		}
+		
 		.onAppear {
 			displayedAllocations = session.allocations.searchBy(searchString)
 		}

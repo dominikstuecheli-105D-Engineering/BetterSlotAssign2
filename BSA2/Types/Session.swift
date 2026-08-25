@@ -53,6 +53,7 @@ import SwiftData
 	}
 	
 	func getStudentByName(_ name: String) -> Student? {
+		guard name != "" else {return nil}
 		foundProcess: if let found = studentsByName[name] {
 			if found.name != name {
 				studentsByName[name] = nil
